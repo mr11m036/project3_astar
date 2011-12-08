@@ -27,6 +27,7 @@
 #include "stlastar.h"
 #include "agent.h"
 
+
 using namespace std;
 
 void Agent::setNext(Room* setRoom)

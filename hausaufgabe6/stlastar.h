@@ -22,7 +22,8 @@ given where due.
   Use at your own risk!
 
 */
-
+#ifndef STLSTAR_H
+#define STLSTAR_H
 // used for text debugging
 #include <iostream>
 #include <stdio.h>
@@ -750,5 +751,5 @@ private: // data
 };
 
 
-
+#endif // STLSTAR_H
    

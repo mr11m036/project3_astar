@@ -76,13 +76,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="agent.cpp" />
+    <ClCompile Include="maze.cpp" />
+    <ClCompile Include="planner.cpp" />
     <ClCompile Include="project3_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="agent.h" />
     <ClInclude Include="fsa.h" />
     <ClInclude Include="maze.h" />
+    <ClInclude Include="planner.h" />
     <ClInclude Include="stlastar.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

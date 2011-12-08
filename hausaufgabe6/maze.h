@@ -138,26 +138,5 @@ T >::add (T * ptr)
   mList.push_back (ptr);
 }
 
-// Definitions
 
-class MapSearchNode
-{
-public:
-	//unsigned int x;	 // the (x,y) positions of the node
-	//unsigned int y;	
-	Room * room;
-	
-	MapSearchNode() { room = NULL; }
-	MapSearchNode( Room * setRoom ) { room=setRoom; }
-
-	float GoalDistanceEstimate( MapSearchNode &nodeGoal );
-	bool IsGoal( MapSearchNode &nodeGoal );
-	bool GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapSearchNode *parent_node );
-	float GetCost( MapSearchNode &successor );
-	bool IsSameState( MapSearchNode &rhs );
-
-	void PrintNodeInfo(); 
-
-
-};
 #endif

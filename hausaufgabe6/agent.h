@@ -20,8 +20,9 @@
 #include <vector>
 
 #include "maze.h"
+#include "planner.h"
 
-#endif
+
 
 
 class Agent
@@ -67,7 +68,7 @@ private:
 	// ID
 };
 
-
+#endif //_INCL_AGENT
 
 
 
