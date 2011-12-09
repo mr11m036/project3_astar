@@ -99,6 +99,7 @@
 
 #define THEWIDTH 1
 #define DEBUG_LISTS 0
+#define DEBUG	1
 /*****************************************************************
  * C/C++ Headers
  *****************************************************************/
@@ -716,8 +717,10 @@ int main (int argc, char **argv)
 {
   int rows = N_ROWS;
   int columns = N_COLUMNS;
+  int tornWalls = 0;
   bool help = false;
   string errMsg = "";
+
 //  clock_t begin_bfs ,end_bfs, begin_dfs, end_dfs, begin_ids, end_ids, begin_astar, end_astar;
   
   vector <Agent> agentList;
@@ -752,7 +755,7 @@ int main (int argc, char **argv)
 
   init (rows, columns, rooms, walls, roomCleaner, wallCleaner);
 
-  int nWalls = walls.size ();
+  int nWalls = walls.size (); // Holds the number of inner walls. First halft of vector refers to vertical walls secound half to horizontal walls.
 
   // ------------------------------------------------
   // Shuffle the walls
@@ -774,17 +777,19 @@ int main (int argc, char **argv)
 	  int value1 = rand ();
 	  int value2 = rand ();
 
+	  // Use absolute value of value1 / value2
 	  if (value1 < 0)
 	    value1 = -value1;
-	  if (value2 < 0)
-	    value2 = -value2;
+	  if (value2 < 0) 
+		value2 = -value2;
 
 	  idx1 = value1 % nWalls;
 	  idx2 = value2 % nWalls;
 
 	}
       while (idx1 == idx2);
-
+	  
+	  // Put some vertical walls to  first half and some of the horizontal to the second half.
       Wall *ptr = walls[idx1];
       walls[idx1] = walls[idx2];
       walls[idx2] = ptr;
@@ -838,13 +843,17 @@ int main (int argc, char **argv)
 
 	  if (first->mColumn == second->mColumn)
 	    {
+		  // Tear down horizontal wall
 	      first->setNorth (second);
 	      second->setSouth (first);
-	    }
+		  tornWalls++;  
+	  }
 	  else
 	    {
+		  // Tear down vertical wall
 	      first->setEast (second);
 	      second->setWest (first);
+		  tornWalls++;
 	    }
 
 	  // Now, we need to put everyone from second's group
@@ -871,6 +880,56 @@ int main (int argc, char **argv)
 	  gMap.erase (sid);
 	}
     }
+  
+  // Labyrinth ausdünnen
+  // Übriggebliebene Wände um 50% dezimieren.
+  #ifdef DEBUG
+	printf ("Initially torn down walls: %d\n ", tornWalls);
+#endif
+
+  int leftWalls = nWalls - tornWalls; // Number of left walls
+  tornWalls = 0;
+
+  
+
+  do
+  {
+	  int value1 = rand ();
+	  value1 = abs(value1);
+	  
+	  // Get a random wall
+	  value1 %= (walls.size()-1);
+	  Room *first = walls[value1]->getFirst ();
+      Room *second = walls[value1]->getSecond ();
+
+	if (first->mColumn == second->mColumn)
+	{
+	// Tear down horizontal wall
+		if (!(walls[value1]->getFirst()->hasNorth()) && !(walls[value1]->getSecond()->hasSouth()))
+		{
+	      first->setNorth (second);
+	      second->setSouth (first);
+		  tornWalls++; 
+		}
+	  }
+	  else
+	  {
+		if (!(walls[value1]->getFirst()->hasEast()) && !(walls[value1]->getSecond()->hasWest()))
+		{
+		  // Tear down vertical wall
+	      first->setEast (second);
+	      second->setWest (first);
+		  tornWalls++;
+		}
+	  }
+
+
+  } while (tornWalls < (leftWalls/2));
+ 
+
+#ifdef DEBUG
+	printf ("Torn down walls: %d ", tornWalls+(nWalls-leftWalls));
+#endif
 
   Room *rFirst = NULL;
   Room *rLast = NULL;
