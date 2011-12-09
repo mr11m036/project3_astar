@@ -55,6 +55,14 @@ public:
 protected:
 
 private:
+	
+	enum AgentState
+	{
+		AGENT_STATE_NOT_INITIALISED,
+		AGENT_STATE_SEARCH_MODE,
+		AGENT_STATE_COMPLETE
+	};
+	
 	int	aID;
 
 	// Set besuchte Agenten
