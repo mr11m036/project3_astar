@@ -116,7 +116,7 @@
 #include <queue>
 #include <iostream>
 #include <math.h>
-
+#include <windows.h> 
 
 
 #include "stlastar.h" // See header for copyright and usage information
@@ -1085,9 +1085,14 @@ int main (int argc, char **argv)
 	ROBOTSEARCH(&agentList[0]);
 
 	//agentList[0].plannedPathIterator
+	
 	do
 	{
-		agentList[0].startAgent();
+	
+	
+	Sleep(1000);
+	system("cls"); 
+	agentList[0].startAgent();
 
 	void (*dump) (Rooms &, Room *, Room *, Room *, Room *) = dumpTxt;
 	dump (rooms, rFirst, rLast, rThird, rForth);

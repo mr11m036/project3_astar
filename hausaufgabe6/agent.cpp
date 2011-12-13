@@ -82,12 +82,20 @@ Agent::AgentState Agent::startAgent()
 					 
 					// Move to next room
 					// TODO check if field is occupied.
-					Agent::currentRoom->mFlagAstar = false; // required for now to print the agent.
-
-					Agent::currentRoom = *plannedPathIterator;
-					Agent::currentRoom->mFlagAstar = true;
-					plannedPathIterator++;
-
+	
+					
+					
+					if (!(plannedPathIterator == plannedPath.end()))
+					{
+						Agent::currentRoom->mFlagAstar = false; // required for now to print the agent.
+						Agent::currentRoom = *plannedPathIterator;
+						Agent::currentRoom->mFlagAstar = true;
+						plannedPathIterator++;
+					}
+					else
+					{
+						nextState = AGENT_STATE_COMPLETE;
+					}
 
 				}
 
