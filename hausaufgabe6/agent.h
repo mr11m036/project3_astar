@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <set>
 #include <vector>
+#include <list>
 
 #include "maze.h"
 #include "planner.h"
@@ -27,43 +28,59 @@
 
 class Agent
 {
-
-public:
-
-	// Konstruktor
-	Agent(int setID = 0, Room * setRoom = NULL, Room * setNextRoom = NULL) : aID (setID), currentRoom (setRoom), nextRoom(setNextRoom) {};
-
-	// get ID
-	int	getID() { return aID;}
-	void	setID(int setID) {aID = setID;};
-
-	void	setTarget(Agent setTarget); 
-	// get Raum
-	Room*	getNext() { return nextRoom;}
-	Room*	getCurrent() { return currentRoom;}
-		// Pointer auf aktuellen Raum
-	Room*	currentRoom;
-	
-	// Pointer auf nächsten Raim
-	Room*	nextRoom;
-	// set Room
-	void	setNext (Room* setRoom);
-
-	// Agent bewegen
-	Room*	moveAgent();
-
-protected:
-
-private:
-	
 	enum AgentState
 	{
 		AGENT_STATE_NOT_INITIALISED,
 		AGENT_STATE_SEARCH_MODE,
 		AGENT_STATE_COMPLETE
 	};
+
+public:
+
+	// Konstruktor
+	Agent(int setID = 0, Room * setRoom = NULL, Room * setNextRoom = NULL, AgentState setState = AGENT_STATE_NOT_INITIALISED) : aID (setID), currentRoom (setRoom), nextRoom(setNextRoom), currentState(setState) {};
+
+	// get ID
+	int	getID() { return aID;}
+
+	void	setID(int setID) {aID = setID;};
+	void	setTarget(Agent setTarget); 
+	void	setCurrentState(AgentState setState);
+	void	setNext (Room* setRoom);
+
+	// get Raum
+	Room*	getNext() { return nextRoom;}
+	Room*	getCurrent() { return currentRoom;}
 	
+	// Pointer auf aktuellen Raum
+	Room*	currentRoom;
+	Room*	targetRoom;
+	
+	// Pointer auf nächsten Raum
+	Room*	nextRoom;
+	// set Room
+
+
+	// Agent bewegen
+	Room*	moveAgent();
+
+	AgentState startAgent();
+
+	
+	// Geplanter Weg
+	typedef list <Room *> listPath;
+	listPath	plannedPath;
+	typedef listPath::iterator listPathIterator;
+	listPathIterator plannedPathIterator;
+
+protected:
+
+private:
+
 	int	aID;
+
+	AgentState currentState;
+	AgentState nextState;
 
 	// Set besuchte Agenten
 	set	<Agent>	visitedAgents;
@@ -71,7 +88,9 @@ private:
 	// Vektor noch nicht besuchte Agenten
 	vector <Agent> notvisitedAgents;
 
-	// Gegangener Weg
+
+
+	// Gegangener Weg. TODO: Brauchen wir den
 	// Koordinaten
 	// ID
 };

@@ -49,6 +49,11 @@ bool MapSearchNode::IsSameState( MapSearchNode &rhs )
 	}
 }
 
+Room * MapSearchNode::getRoom()
+{
+	return room;
+}
+
 void MapSearchNode::PrintNodeInfo()
 {
 	//cout << "Node position : (" << room->mColumn << ", " << room->mRow << ")" << endl;

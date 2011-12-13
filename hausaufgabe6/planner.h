@@ -35,6 +35,8 @@ public:
 	MapSearchNode() { room = NULL; }
 	MapSearchNode( Room * setRoom ) { room=setRoom; }
 
+	Room * getRoom();
+
 	float GoalDistanceEstimate( MapSearchNode &nodeGoal );
 	bool IsGoal( MapSearchNode &nodeGoal );
 	bool GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapSearchNode *parent_node );

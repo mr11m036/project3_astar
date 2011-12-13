@@ -42,6 +42,7 @@ void Agent::setTarget(Agent setTarget)
 
 Room* Agent::moveAgent()
 {
+	// TODO: check if next room is occupied.
 	if (nextRoom != NULL)
 	{
 		currentRoom = nextRoom;
@@ -54,3 +55,51 @@ Room* Agent::moveAgent()
 	}
 
 }
+
+Agent::AgentState Agent::startAgent()
+{
+	// Agent State machine
+	switch(currentState)
+	{
+			case AGENT_STATE_NOT_INITIALISED:
+				// set first target
+				// plannedPath is alread next Room.
+				plannedPathIterator = plannedPath.begin();
+				Agent::nextState = AGENT_STATE_SEARCH_MODE;
+			break;
+ 
+			case AGENT_STATE_SEARCH_MODE: 
+				// run strategy to find other robots
+				if (Agent::plannedPath.empty())
+				{
+					// TODO: Check if some robots still in not visited Queue.
+					//		If so set Other target
+					//		If done set state to AGENT_STATE_COMPLETE
+				}
+				else
+				{
+					 // TODO: Check if target moved. Recalculate or so.
+					 
+					// Move to next room
+					// TODO check if field is occupied.
+					Agent::currentRoom->mFlagAstar = false; // required for now to print the agent.
+
+					Agent::currentRoom = *plannedPathIterator;
+					Agent::currentRoom->mFlagAstar = true;
+					plannedPathIterator++;
+
+
+				}
+
+			break;
+ 
+			case AGENT_STATE_COMPLETE:
+				// run strategy to evade other robots
+
+			break;
+	}
+
+	currentState = nextState;
+	return currentState;
+}
+
