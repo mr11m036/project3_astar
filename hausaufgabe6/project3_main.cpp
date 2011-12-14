@@ -826,12 +826,17 @@ static void	initAgents(int agentNumbers, vector <Agent> &setAgents, Rooms _rooms
 	  tempAgent.currentRoom = getRandomRoom(_rooms);
 	  tempAgent.nextRoom = NULL;
 	  tempAgent.setID(loop);
-	  
+	 
 	  setAgents.push_back(tempAgent);
 
 	  #ifdef DEBUG
 	  printf ("Room Nr.: %d mID: %d x: %d y: %d\n", loop, tempAgent.getCurrent()->mID, tempAgent.getCurrent()->mColumn, tempAgent.getCurrent()->mRow); 
 	  #endif
+	}
+
+	for (int loop = 0; loop < agentNumbers; loop++)
+	{
+		 tempAgent.setnotvisitedAgents(setAgents);
 	}
 }
 
@@ -1077,34 +1082,37 @@ int main (int argc, char **argv)
    rThird = agentList[2].getCurrent();
   rForth = agentList[3].getCurrent();
 
-	//begin_astar = clock();
-	//ASTAR (rFirst, rLast);
-	//ASTAR (rThird, rForth);
-	//end_astar = clock();
+
 	agentList[0].targetRoom = agentList[1].currentRoom;
 	ROBOTSEARCH(&agentList[0]);
-
+	agentList[1].targetRoom = agentList[0].currentRoom;
+	ROBOTSEARCH(&agentList[1]);
+	agentList[2].targetRoom = agentList[3].currentRoom;
+	ROBOTSEARCH(&agentList[2]);
+	agentList[3].targetRoom = agentList[2].currentRoom;
+	ROBOTSEARCH(&agentList[3]);
 	//agentList[0].plannedPathIterator
 	
 	do
 	{
 	
 	
-	Sleep(1000);
+	Sleep(600);
 	system("cls"); 
 	agentList[0].startAgent();
-
+	agentList[2].startAgent();
+	agentList[3].startAgent();
 	void (*dump) (Rooms &, Room *, Room *, Room *, Room *) = dumpTxt;
 	dump (rooms, rFirst, rLast, rThird, rForth);
 	
 
 	} while (true);
   //vector <Agent>::iterator i;
-
+	/*
   for (int i= 0; i < agentList.size(); i++)
   {
 	  printf ("Agent :%d\n", agentList[i].getID());
-  }
+  }*/
  
 
   return (0);

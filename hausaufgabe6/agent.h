@@ -32,6 +32,7 @@ class Agent
 	{
 		AGENT_STATE_NOT_INITIALISED,
 		AGENT_STATE_SEARCH_MODE,
+		AGENT_STATE_COLLISION,
 		AGENT_STATE_COMPLETE
 	};
 
@@ -47,6 +48,7 @@ public:
 	void	setTarget(Agent setTarget); 
 	void	setCurrentState(AgentState setState);
 	void	setNext (Room* setRoom);
+	void	setnotvisitedAgents(vector <Agent> setnotvisited);
 
 	// get Raum
 	Room*	getNext() { return nextRoom;}
@@ -71,7 +73,16 @@ public:
 	typedef list <Room *> listPath;
 	listPath	plannedPath;
 	typedef listPath::iterator listPathIterator;
-	listPathIterator plannedPathIterator;
+	listPathIterator plannedPathIterator;	
+	
+	// Set besuchte Agenten
+	vector	<Agent>	visitedAgents;
+
+	// Vektor noch nicht besuchte Agenten
+	vector <Agent> notvisitedAgents;
+
+
+
 
 protected:
 
@@ -82,11 +93,6 @@ private:
 	AgentState currentState;
 	AgentState nextState;
 
-	// Set besuchte Agenten
-	set	<Agent>	visitedAgents;
-
-	// Vektor noch nicht besuchte Agenten
-	vector <Agent> notvisitedAgents;
 
 
 

@@ -56,6 +56,11 @@ Room* Agent::moveAgent()
 
 }
 
+void	Agent::setnotvisitedAgents(vector <Agent> setnotvisited)
+{
+	notvisitedAgents = setnotvisited;
+}
+
 Agent::AgentState Agent::startAgent()
 {
 	// Agent State machine
@@ -64,8 +69,15 @@ Agent::AgentState Agent::startAgent()
 			case AGENT_STATE_NOT_INITIALISED:
 				// set first target
 				// plannedPath is alread next Room.
-				plannedPathIterator = plannedPath.begin();
-				Agent::nextState = AGENT_STATE_SEARCH_MODE;
+				if (!plannedPath.empty())
+				{
+					plannedPathIterator = plannedPath.begin();
+					Agent::nextState = AGENT_STATE_SEARCH_MODE;
+				}
+				else
+				{
+					Agent::nextState = AGENT_STATE_NOT_INITIALISED;
+				}
 			break;
  
 			case AGENT_STATE_SEARCH_MODE: 
@@ -73,36 +85,73 @@ Agent::AgentState Agent::startAgent()
 				if (Agent::plannedPath.empty())
 				{
 					// TODO: Check if some robots still in not visited Queue.
-					//		If so set Other target
-					//		If done set state to AGENT_STATE_COMPLETE
+					if (Agent::notvisitedAgents.empty())
+					{
+						// No more robots left in queue.
+						Agent::nextState = AGENT_STATE_COMPLETE;
+					}
+					else
+					{
+						// TODO´: define new target
+						//		  depends on strategy
+					}
+
 				}
-				else
+				else //von if (Agent::plannedPath.empty())
 				{
-					 // TODO: Check if target moved. Recalculate or so.
-					 
-					// Move to next room
-					// TODO check if field is occupied.
-	
-					
-					
+					 // TODO: Check if target moved. Recalculate or so.d.
+					// Room is free.
 					if (!(plannedPathIterator == plannedPath.end()))
 					{
-						Agent::currentRoom->mFlagAstar = false; // required for now to print the agent.
-						Agent::currentRoom = *plannedPathIterator;
-						Agent::currentRoom->mFlagAstar = true;
-						plannedPathIterator++;
+						if ((*plannedPathIterator)->mFlagAstar)
+						{
+							// Room is occupied.
+							nextState = AGENT_STATE_COLLISION;
+						}
+						else
+						{
+							Agent::currentRoom->mFlagAstar = false; // required for now to print the agent.
+							Agent::currentRoom = *plannedPathIterator;
+							Agent::currentRoom->mFlagAstar = true;
+							plannedPathIterator++;
+						}
+					}
+					else
+					{
+						
+						nextState = AGENT_STATE_COMPLETE;
+					}
+				}
+				
+			break;
+
+			case AGENT_STATE_COLLISION:
+				// Handle if robot detects another robot in an adjacent field.
+				// TODO: Check if adjacent robot is goal, any other robot not visited or alread visited robot.
+
+					if (!(plannedPathIterator == plannedPath.end()))
+					{
+						if ((*plannedPathIterator)->mFlagAstar)
+						{
+							// Room is occupied.
+							nextState = AGENT_STATE_COLLISION;
+						}
+						else
+						{
+							// Continue search mode.
+							nextState = AGENT_STATE_SEARCH_MODE;
+						}
 					}
 					else
 					{
 						nextState = AGENT_STATE_COMPLETE;
 					}
 
-				}
-
 			break;
- 
+
 			case AGENT_STATE_COMPLETE:
 				// run strategy to evade other robots
+	
 
 			break;
 	}
