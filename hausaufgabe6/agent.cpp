@@ -31,12 +31,17 @@
 
 using namespace std;
 
+bool operator==(const Agent& x, const Agent& y)
+{
+	return (x.aID == y.aID);
+}
+
 void Agent::setNext(Room* setRoom)
 {
 	nextRoom = setRoom;
 }
 
-void Agent::setTarget(Agent setTarget)
+void Agent::setTarget(Agent* setTarget)
 {
 	notvisitedAgents.push_back(setTarget);
 }
@@ -57,7 +62,7 @@ Room* Agent::moveAgent()
 
 }
 
-void	Agent::setnotvisitedAgents(vector <Agent> setnotvisited)
+void	Agent::setnotvisitedAgents(vector <Agent *> setnotvisited)
 {
 	notvisitedAgents = setnotvisited;
 }
@@ -68,6 +73,9 @@ Agent::AgentState Agent::startAgent()
 	switch(currentState)
 	{
 			case AGENT_STATE_NOT_INITIALISED:
+				// Delete own reference in not visited list.
+				//notvisitedAgents.fi
+				
 				try
 				{
 					// Set prime marker (pointer to robot and flag) on maze.

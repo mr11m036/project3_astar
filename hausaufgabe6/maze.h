@@ -35,6 +35,7 @@ public:
   bool  hasSouth ();
   bool  hasEast ();
   bool  hasWest ();
+  bool  isFree ();
 
   void  setNorth (Room * north);
   void  setSouth (Room * south);

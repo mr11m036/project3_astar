@@ -820,6 +820,7 @@ static Room* getRandomRoom( Rooms _rooms)
 static void	initAgents(int agentNumbers, vector <Agent> &setAgents, Rooms _rooms)
 {
 	Agent tempAgent;
+	vector <Agent *> tempSetAgents;
 	
 	for (int loop = 0; loop < agentNumbers; loop++)
 	{
@@ -834,9 +835,15 @@ static void	initAgents(int agentNumbers, vector <Agent> &setAgents, Rooms _rooms
 	  #endif
 	}
 
+	// Create vector of agent pointers as setnotvisitedAgents needs this type (save memory).
 	for (int loop = 0; loop < agentNumbers; loop++)
 	{
-		 tempAgent.setnotvisitedAgents(setAgents);
+		tempSetAgents.push_back(&setAgents[loop]);
+	}
+	// Save the generated vector in each agent (including himself). The pointer to agent himself can be deleted in the init state.
+	for (int loop = 0; loop < agentNumbers; loop++)
+	{
+		setAgents[loop].setnotvisitedAgents(tempSetAgents);
 	}
 }
 

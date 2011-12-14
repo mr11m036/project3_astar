@@ -327,6 +327,11 @@ bool Room::hasWest ()
   return (mWest != NULL);
 }
 
+bool Room::isFree ()
+{
+  return (occupiedRobot == NULL);
+}
+
 void Room::setNorth (Room * ptr)
 {
   mNorth = ptr;

@@ -105,7 +105,7 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 	// push each possible move except allowing the search to go backwards
 	
 	// Check Westnode
-	if (room->hasWest() && (parent_room != NULL))
+	if (room->hasWest() && (parent_room != NULL) && room->isFree())
 	{
 		// We dont want to go back.
 		if ((room->mWest->mCost < 9) && !(parent_room->mID == room->mWest->mID))
@@ -116,7 +116,7 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 	}
 
 	// Check Southnode
-	if (room->hasSouth()&& (parent_room != NULL))
+	if (room->hasSouth()&& (parent_room != NULL) && room->isFree())
 	{
 		// We dont want to go back.
 		if ((room->mSouth->mCost < 9) && !(parent_room->mID == room->mSouth->mID))
@@ -127,7 +127,7 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 	}
 
 	// Check Eastnode
-	if (room->hasEast()&& (parent_room != NULL))
+	if (room->hasEast()&& (parent_room != NULL) && room->isFree())
 	{
 		// We dont want to go back.
 		if ((room->mEast->mCost < 9) && !(parent_room->mID == room->mEast->mID))
@@ -138,7 +138,7 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 	}
 
 	// Check Northnode
-	if (room->hasNorth() && (parent_room != NULL))
+	if (room->hasNorth() && (parent_room != NULL) && room->isFree())
 	{
 		// We dont want to go back.
 		if ((room->mNorth->mCost < 9) && !(parent_room->mID == room->mNorth->mID))

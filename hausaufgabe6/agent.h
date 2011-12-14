@@ -24,10 +24,10 @@
 #include "planner.h"
 
 
-
-
 class Agent
 {
+	friend bool operator==(const Agent&, const Agent&);
+
 	enum AgentState
 	{
 		AGENT_STATE_NOT_INITIALISED,
@@ -45,10 +45,11 @@ public:
 	int	getID() { return aID;}
 
 	void	setID(int setID) {aID = setID;};
-	void	setTarget(Agent setTarget); 
+	void	setTarget(Agent* setTarget); 
+	Agent*	getTarget(); 
 	void	setCurrentState(AgentState setState);
 	void	setNext (Room* setRoom);
-	void	setnotvisitedAgents(vector <Agent> setnotvisited);
+	void	setnotvisitedAgents(vector <Agent *> setnotvisited);
 
 	// get Raum
 	Room*	getNext() { return nextRoom;}
@@ -76,10 +77,10 @@ public:
 	listPathIterator plannedPathIterator;	
 	
 	// Set besuchte Agenten
-	vector	<Agent>	visitedAgents;
+	vector	<Agent *>	visitedAgents;
 
 	// Vektor noch nicht besuchte Agenten
-	vector <Agent> notvisitedAgents;
+	vector <Agent *> notvisitedAgents;
 
 
 
