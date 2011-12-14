@@ -3,6 +3,7 @@
 #define _INCL_MAZE
 #include <iostream>
 
+
 /*****************************************************************
  * Local Types
  *****************************************************************/
@@ -62,6 +63,8 @@ public:
   bool	mFlagBFS;
   bool	mFlagIDS;
   bool	mFlagAstar;
+
+  Agent*	occupiedRobot;
 
 private:
   int    mGroupID;

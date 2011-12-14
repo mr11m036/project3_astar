@@ -25,6 +25,7 @@
 
 #include "maze.h"
 
+
 using namespace std;
 // --------------
 // Room
@@ -45,7 +46,8 @@ mCost(1),
 mFlag (false),
 mFlagBFS (false),
 mFlagIDS (false),
-mFlagAstar(false)
+mFlagAstar(false),
+occupiedRobot(NULL)
 
 {
 }

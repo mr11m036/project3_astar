@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include "maze.h"
+#include "agent.h"
 #include "stlastar.h"
 // Definitions
 
@@ -30,7 +31,7 @@ class MapSearchNode
 public:
 	//unsigned int x;	 // the (x,y) positions of the node
 	//unsigned int y;	
-	Room * room;
+	Room* room;
 	
 	MapSearchNode() { room = NULL; }
 	MapSearchNode( Room * setRoom ) { room=setRoom; }

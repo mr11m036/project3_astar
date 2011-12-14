@@ -27,6 +27,7 @@
 #include "stlastar.h"
 #include "agent.h"
 
+#define	AGENT_INIT_ERROR	10
 
 using namespace std;
 
@@ -67,9 +68,29 @@ Agent::AgentState Agent::startAgent()
 	switch(currentState)
 	{
 			case AGENT_STATE_NOT_INITIALISED:
+				try
+				{
+					// Set prime marker (pointer to robot and flag) on maze.
+					if (currentRoom->occupiedRobot == NULL)
+					{
+						currentRoom->occupiedRobot = this;
+					}
+					else
+					{
+						// throw exception. Initial Place is occupied. This should not have happened.
+						Agent::nextState = AGENT_STATE_NOT_INITIALISED;
+						throw AGENT_INIT_ERROR;
+					}
+				}
+				catch (int e)
+				{
+					 cout << "An exception occurred. Exception Nr. " << e << endl;
+				}
 				// set first target
 				// plannedPath is alread next Room.
-				if (!plannedPath.empty())
+
+
+				if (!plannedPath.empty() && (currentRoom->occupiedRobot == this))
 				{
 					plannedPathIterator = plannedPath.begin();
 					Agent::nextState = AGENT_STATE_SEARCH_MODE;
@@ -103,7 +124,7 @@ Agent::AgentState Agent::startAgent()
 					// Room is free.
 					if (!(plannedPathIterator == plannedPath.end()))
 					{
-						if ((*plannedPathIterator)->mFlagAstar)
+						if ((*plannedPathIterator)->occupiedRobot != NULL)
 						{
 							// Room is occupied.
 							nextState = AGENT_STATE_COLLISION;
@@ -111,8 +132,13 @@ Agent::AgentState Agent::startAgent()
 						else
 						{
 							Agent::currentRoom->mFlagAstar = false; // required for now to print the agent.
+							Agent::currentRoom->occupiedRobot = NULL;
+
 							Agent::currentRoom = *plannedPathIterator;
+
 							Agent::currentRoom->mFlagAstar = true;
+							Agent::currentRoom->occupiedRobot = this;
+
 							plannedPathIterator++;
 						}
 					}
