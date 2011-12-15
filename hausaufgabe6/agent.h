@@ -51,6 +51,8 @@ public:
 	void	setNext (Room* setRoom);
 	void	setnotvisitedAgents(vector <Agent *> setnotvisited);
 
+	bool	planPath(Room * targetAgent);
+	bool	alreadyTouched (Agent * contactAgent);
 	// get Raum
 	Room*	getNext() { return nextRoom;}
 	Room*	getCurrent() { return currentRoom;}
@@ -58,6 +60,8 @@ public:
 	// Pointer auf aktuellen Raum
 	Room*	currentRoom;
 	Room*	targetRoom;
+
+	//Agent*	targetAgent;
 	
 	// Pointer auf nächsten Raum
 	Room*	nextRoom;
@@ -77,7 +81,8 @@ public:
 	listPathIterator plannedPathIterator;	
 	
 	// Set besuchte Agenten
-	vector	<Agent *>	visitedAgents;
+	typedef vector	<Agent *>	visitedAgents;
+	typedef visitedAgents::iterator visitedAgentsIterator;
 
 	// Vektor noch nicht besuchte Agenten
 	vector <Agent *> notvisitedAgents;

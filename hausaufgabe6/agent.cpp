@@ -36,6 +36,151 @@ bool operator==(const Agent& x, const Agent& y)
 	return (x.aID == y.aID);
 }
 
+bool Agent::alreadyTouched (Agent * contactAgent)
+{
+	// search in visited list if robot was already touched.
+	/* http://stackoverflow.com/questions/571394/how-to-find-an-item-in-a-stdvector */
+	visitedAgents ag;
+	visitedAgentsIterator resultIterator;
+
+	resultIterator = find (ag.begin(), ag.end(), contactAgent);
+
+	if (resultIterator != ag.end())
+	{
+		return (true);
+	}
+	else
+	{
+		return (false);
+	}
+}
+bool Agent::planPath(Room* targetAgent)
+{
+	AStarSearch<MapSearchNode> astarsearch;
+	bool	searchResult = false;
+
+	unsigned int SearchCount = 0;
+	const unsigned int NumSearches = 1;
+	
+	while(SearchCount < NumSearches)
+	{
+	
+		// Create a start state
+		MapSearchNode nodeStart;
+		nodeStart.room = currentRoom; // Start from this robots location.
+
+		// Define the goal state
+		MapSearchNode nodeEnd;
+		nodeEnd.room =  targetRoom;// targetAgent->currentRoom; // TODO: Use TargetAgent instead? Or set targetRoom when selecting targetAgent
+
+		// Set Start and goal states
+		astarsearch.SetStartAndGoalStates( nodeStart, nodeEnd );
+
+		unsigned int SearchState;
+		unsigned int SearchSteps = 0;
+
+		do
+		{
+			SearchState = astarsearch.SearchStep();
+
+			SearchSteps++;
+
+	#if DEBUG_LISTS
+
+			cout << "Steps:" << SearchSteps << "\n";
+
+			int len = 0;
+
+			cout << "Open:\n";
+			MapSearchNode *p = astarsearch.GetOpenListStart();
+			while( p )
+			{
+				len++;
+	#if !DEBUG_LIST_LENGTHS_ONLY			
+				((MapSearchNode *)p)->PrintNodeInfo();
+	#endif
+				p = astarsearch.GetOpenListNext();
+				
+			}
+
+			cout << "Open list has " << len << " nodes\n";
+
+			len = 0;
+
+			cout << "Closed:\n";
+			p = astarsearch.GetClosedListStart();
+			while( p )
+			{
+				len++;
+	#if !DEBUG_LIST_LENGTHS_ONLY			
+				p->PrintNodeInfo();
+	#endif			
+				p = astarsearch.GetClosedListNext();
+			}
+
+			cout << "Closed list has " << len << " nodes\n";
+	#endif
+
+		}
+		while( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SEARCHING );
+
+		if( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SUCCEEDED )
+		{
+			//cout << "Search found goal state\n";
+				searchResult = true;
+				MapSearchNode *node = astarsearch.GetSolutionStart();
+
+	#if DISPLAY_SOLUTION
+				//cout << "Displaying solution\n";
+	#endif
+				int steps = 0;
+
+				node->PrintNodeInfo();
+				for( ;; )
+				{
+					node = astarsearch.GetSolutionNext();
+
+					if( !node )
+					{
+						break;
+					}
+
+					// Setzt Pfadinfo  
+					//node->PrintNodeInfo();
+
+					// Save path to agent.
+					
+					plannedPath.push_back(node->getRoom());
+
+					steps ++;
+				
+				};
+
+				//cout << "Solution steps " << steps << endl;
+
+				// Once you're done with the solution you can free the nodes up
+				astarsearch.FreeSolutionNodes();
+
+	
+		}
+		else if( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_FAILED ) 
+		{
+			//cout << "Search terminated. Did not find goal state\n";
+			searchResult = false;
+		
+		}
+
+		// Display the number of loops the search went through
+		//cout << "SearchSteps : " << SearchSteps << "\n";
+
+		SearchCount ++;
+
+		astarsearch.EnsureMemoryFreed();
+	}
+
+	return (searchResult);
+}
+
 void Agent::setNext(Room* setRoom)
 {
 	nextRoom = setRoom;
@@ -75,13 +220,20 @@ Agent::AgentState Agent::startAgent()
 			case AGENT_STATE_NOT_INITIALISED:
 				// Delete own reference in not visited list.
 				//notvisitedAgents.fi
+
+				Agent::nextState = AGENT_STATE_NOT_INITIALISED;
+
+				// TODO check before planning. change to target Agent type instead of Room.
+				Agent::planPath(targetRoom);
 				
 				try
 				{
 					// Set prime marker (pointer to robot and flag) on maze.
-					if (currentRoom->occupiedRobot == NULL)
+					if ((currentRoom->occupiedRobot == NULL) || (currentRoom->occupiedRobot == this))
 					{
 						currentRoom->occupiedRobot = this;
+						
+
 					}
 					else
 					{
@@ -97,6 +249,19 @@ Agent::AgentState Agent::startAgent()
 				// set first target
 				// plannedPath is alread next Room.
 
+				//if (targetRoom != NULL) // change target Room to agent
+				//		{
+				//			// Plan initial path.
+				//			if (targetRoom/*targetRoom->occupiedRobot*/)
+				//			{
+				//				//planPath(targetRoom->occupiedRobot);
+				//				Agent::planPath(targetRoom);
+				//			}
+				//			else
+				//			{
+				//				Agent::nextState = AGENT_STATE_NOT_INITIALISED;
+				//			}
+				//		}
 
 				if (!plannedPath.empty() && (currentRoom->occupiedRobot == this))
 				{
@@ -107,6 +272,7 @@ Agent::AgentState Agent::startAgent()
 				{
 					Agent::nextState = AGENT_STATE_NOT_INITIALISED;
 				}
+
 			break;
  
 			case AGENT_STATE_SEARCH_MODE: 
@@ -165,7 +331,8 @@ Agent::AgentState Agent::startAgent()
 
 					if (!(plannedPathIterator == plannedPath.end()))
 					{
-						if ((*plannedPathIterator)->mFlagAstar)
+						//if ((*plannedPathIterator)->mFlagAstar)
+						if ((*plannedPathIterator)->occupiedRobot != NULL)
 						{
 							// Room is occupied.
 							nextState = AGENT_STATE_COLLISION;
