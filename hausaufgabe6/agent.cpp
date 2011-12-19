@@ -28,6 +28,7 @@
 #include "agent.h"
 
 #define	AGENT_INIT_ERROR	10
+#define	AGENT_ESTIMATE_ERROR	20
 
 using namespace std;
 
@@ -36,16 +37,21 @@ bool operator==(const Agent& x, const Agent& y)
 	return (x.aID == y.aID);
 }
 
+Agent* Agent::getTarget()
+{
+	return targetAgent;
+}
+
 bool Agent::alreadyTouched (Agent * contactAgent)
 {
 	// search in visited list if robot was already touched.
 	/* http://stackoverflow.com/questions/571394/how-to-find-an-item-in-a-stdvector */
-	visitedAgents ag;
+	
 	visitedAgentsIterator resultIterator;
 
-	resultIterator = find (ag.begin(), ag.end(), contactAgent);
+	resultIterator = find (visitedAgentsList.begin(), visitedAgentsList.end(), contactAgent);
 
-	if (resultIterator != ag.end())
+	if (resultIterator != visitedAgentsList.end())
 	{
 		return (true);
 	}
@@ -54,6 +60,22 @@ bool Agent::alreadyTouched (Agent * contactAgent)
 		return (false);
 	}
 }
+
+// TODO Delete Function erstellen mit Parameter Agent und Vector
+visitedAgentsIterator Agent::findVisitedAgent (Agent * contactAgent)
+{
+	// search in visited list if robot was already touched.
+	/* http://stackoverflow.com/questions/571394/how-to-find-an-item-in-a-stdvector */
+	
+	visitedAgentsIterator resultIterator;
+
+	resultIterator = find (notvisitedAgents.begin(), notvisitedAgents.end(), contactAgent);
+
+	return (resultIterator);
+}
+
+
+
 bool Agent::planPath(Room* targetAgent)
 {
 	AStarSearch<MapSearchNode> astarsearch;
@@ -186,25 +208,162 @@ void Agent::setNext(Room* setRoom)
 	nextRoom = setRoom;
 }
 
-void Agent::setTarget(Agent* setTarget)
+void Agent::pushToNotVisitedList(Agent* setTarget)
 {
 	notvisitedAgents.push_back(setTarget);
 }
 
-Room* Agent::moveAgent()
+void Agent::setTarget(Agent* setTarget)
 {
-	// TODO: check if next room is occupied.
-	if (nextRoom != NULL)
+	targetAgent = setTarget;
+	//notvisitedAgents.push_back(setTarget);
+}
+
+void Agent::scanAgents()
+{
+	visitedAgentsIterator tempIt;
+	// Check if there is an agent in an adjacent room.
+	if (currentRoom->hasEast())
 	{
-		currentRoom = nextRoom;
-		return	currentRoom;
+		if (currentRoom->mEast->occupiedRobot != NULL)
+		{
+			if (!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			{
+				// Add this robot to the visted List
+				tempIt = findVisitedAgent(currentRoom->mEast->occupiedRobot);
+							
+				Agent::visitedAgentsList.push_back(currentRoom->mEast->occupiedRobot);
+				if (tempIt != notvisitedAgents.end())
+				{
+					notvisitedAgents.erase(tempIt);
+				}
+							
+			}
+		}
+	}
+				
+	if (currentRoom->hasNorth())
+	{
+		if (currentRoom->mNorth->occupiedRobot != NULL)
+		{
+			// Add this robot to the visted List
+			tempIt = findVisitedAgent(currentRoom->mNorth->occupiedRobot);
+			Agent::visitedAgentsList.push_back(currentRoom->mNorth->occupiedRobot);
+						
+			if (tempIt != notvisitedAgents.end())
+			{
+				notvisitedAgents.erase(tempIt);
+			}
+		}
+	}
+				
+	if (currentRoom->hasSouth())
+	{
+		if (currentRoom->mSouth->occupiedRobot != NULL)
+		{
+			// Add this robot to the visted List
+			tempIt = findVisitedAgent(currentRoom->mSouth->occupiedRobot);
+			Agent::visitedAgentsList.push_back(currentRoom->mSouth->occupiedRobot);
+						
+			if (tempIt != notvisitedAgents.end())
+			{
+				notvisitedAgents.erase(tempIt);
+			}
+		}
+	}
+				
+	if (currentRoom->hasWest())
+	{
+		if (currentRoom->mWest->occupiedRobot != NULL)
+		{
+			// Add this robot to the visted List
+			tempIt = findVisitedAgent(currentRoom->mWest->occupiedRobot);
+			Agent::visitedAgentsList.push_back(currentRoom->mWest->occupiedRobot);
+						
+			if (tempIt != notvisitedAgents.end())
+			{
+				notvisitedAgents.erase(tempIt);
+			}
+		}
+	}
+	// Endof Robot check for visted agents
+}
+
+void Agent::moveAgent()
+{
+	// Room is free.
+	if (!(plannedPathIterator == plannedPath.end()))
+	{
+		if ((*plannedPathIterator)->occupiedRobot != NULL)
+		{
+			// Room is occupied.
+			nextState = AGENT_STATE_COLLISION;
+		}
+		else
+		{
+			Agent::currentRoom->mFlagAstar = false; // required for now to print the agent.
+			Agent::currentRoom->occupiedRobot = NULL;
+
+			Agent::currentRoom = *plannedPathIterator;
+
+			Agent::currentRoom->mFlagAstar = true;
+			Agent::currentRoom->occupiedRobot = this;
+
+			plannedPathIterator++;
+		}
 	}
 	else
 	{
-		// Next room couldn't be set
-		return NULL;
+						
+		nextState = AGENT_STATE_COMPLETE;
+	}
+}
+
+float	Agent::getEstimateDistance (Agent* solverAgent ,Agent* targetAgent)
+{
+	float returnvalue = -1;
+	try
+	{
+		if ((targetAgent == NULL) || (targetAgent->currentRoom == NULL))
+			throw AGENT_ESTIMATE_ERROR;
+		
+		float xd = fabs(float(((float)solverAgent->currentRoom->mColumn - (float)targetAgent->currentRoom->mColumn)));
+		float yd = fabs(float(((float)solverAgent->currentRoom->mRow - (float)targetAgent->currentRoom->mRow)));
+		returnvalue = xd + yd;
+	}
+	catch (int e1)
+	{
+		returnvalue = -1;
 	}
 
+	return returnvalue;
+}
+
+bool	Agent::initDistanceMap()
+{
+	bool returnval = false;
+	listAgentsIterator tempIt;
+	float tempDistance = 0;
+	mapDistanceReturnPair retPair;
+	
+	if (!notvisitedAgents.empty())
+	{
+		tempIt = notvisitedAgents.begin();
+		distanceHeuristicIt = distanceHeuristic.begin();
+		while (tempIt != notvisitedAgents.end())
+		{
+			tempDistance = getEstimateDistance(this, *tempIt);
+			retPair = distanceHeuristic.insert(mapDistanceInsertPair(*tempIt, (float)tempDistance));
+			tempIt++;
+		}
+		returnval = true;
+	}
+	else
+	{
+		returnval = false;
+	}
+
+	return returnval;
 }
 
 void	Agent::setnotvisitedAgents(vector <Agent *> setnotvisited)
@@ -215,17 +374,51 @@ void	Agent::setnotvisitedAgents(vector <Agent *> setnotvisited)
 Agent::AgentState Agent::startAgent()
 {
 	// Agent State machine
+	visitedAgentsIterator tempIt;
+
 	switch(currentState)
 	{
 			case AGENT_STATE_NOT_INITIALISED:
 				// Delete own reference in not visited list.
 				//notvisitedAgents.fi
+				tempIt = findVisitedAgent(this);
+				// Init distance map.
+				try
+				{
+					if (!initDistanceMap())
+						throw AGENT_INIT_ERROR;
+				}
+				catch (int e)
+				{
+				}
+
+				if (tempIt != notvisitedAgents.end())
+				{
+					notvisitedAgents.erase(tempIt);
+				}
 
 				Agent::nextState = AGENT_STATE_NOT_INITIALISED;
-
-				// TODO check before planning. change to target Agent type instead of Room.
-				Agent::planPath(targetRoom);
-				
+				/*try
+				{
+				}
+				catch (int e)
+				{
+				}*/
+				 //TODO check before planning. change to target Agent type instead of Room.
+				if (targetAgent)
+				{
+					if (targetAgent->currentRoom)
+					{
+						targetRoom = targetAgent->currentRoom;
+						Agent::planPath(targetRoom);
+					}
+				}
+				else
+				{
+					// No target
+					Agent::nextState = AGENT_STATE_NOT_INITIALISED;
+				}
+				//Agent::planPath(targetRoom);
 				try
 				{
 					// Set prime marker (pointer to robot and flag) on maze.
@@ -249,20 +442,6 @@ Agent::AgentState Agent::startAgent()
 				// set first target
 				// plannedPath is alread next Room.
 
-				//if (targetRoom != NULL) // change target Room to agent
-				//		{
-				//			// Plan initial path.
-				//			if (targetRoom/*targetRoom->occupiedRobot*/)
-				//			{
-				//				//planPath(targetRoom->occupiedRobot);
-				//				Agent::planPath(targetRoom);
-				//			}
-				//			else
-				//			{
-				//				Agent::nextState = AGENT_STATE_NOT_INITIALISED;
-				//			}
-				//		}
-
 				if (!plannedPath.empty() && (currentRoom->occupiedRobot == this))
 				{
 					plannedPathIterator = plannedPath.begin();
@@ -276,6 +455,9 @@ Agent::AgentState Agent::startAgent()
 			break;
  
 			case AGENT_STATE_SEARCH_MODE: 
+
+				(void) scanAgents();
+
 				// run strategy to find other robots
 				if (Agent::plannedPath.empty())
 				{
@@ -295,36 +477,59 @@ Agent::AgentState Agent::startAgent()
 				else //von if (Agent::plannedPath.empty())
 				{
 					 // TODO: Check if target moved. Recalculate or so.d.
-					// Room is free.
-					if (!(plannedPathIterator == plannedPath.end()))
+				}
+
+				(void) moveAgent();
+				
+			break;
+
+			case AGENT_STATE_REPLAN:
+
+				if (!(plannedPathIterator == plannedPath.end()) && targetAgent)
+				{
+					if (!alreadyTouched(targetAgent))
 					{
-						if ((*plannedPathIterator)->occupiedRobot != NULL)
+						// Search new path to current target.
+						if (targetAgent)
 						{
-							// Room is occupied.
-							nextState = AGENT_STATE_COLLISION;
+							if (targetAgent->currentRoom)
+							{
+								targetRoom = targetAgent->currentRoom;
+								Agent::planPath(targetRoom);
+								Agent::nextState = AGENT_STATE_SEARCH_MODE;
+							}
 						}
 						else
 						{
-							Agent::currentRoom->mFlagAstar = false; // required for now to print the agent.
-							Agent::currentRoom->occupiedRobot = NULL;
-
-							Agent::currentRoom = *plannedPathIterator;
-
-							Agent::currentRoom->mFlagAstar = true;
-							Agent::currentRoom->occupiedRobot = this;
-
-							plannedPathIterator++;
+							// No target
+							Agent::nextState = AGENT_STATE_REPLAN;
 						}
 					}
 					else
 					{
-						
-						nextState = AGENT_STATE_COMPLETE;
+						// find new target.
+						nextState = AGENT_STATE_REPLAN;
+					}
+				}
+				else
+				{
+					if (!alreadyTouched(targetAgent))
+					{
+						// Search new path to current target.
+						targetRoom = targetAgent->currentRoom;
+						Agent::planPath(targetRoom);
+						Agent::nextState = AGENT_STATE_SEARCH_MODE;
+					}
+					else
+					{
+						// find new target.
+						nextState = AGENT_STATE_REPLAN;
 					}
 				}
 				
+				
 			break;
-
+			
 			case AGENT_STATE_COLLISION:
 				// Handle if robot detects another robot in an adjacent field.
 				// TODO: Check if adjacent robot is goal, any other robot not visited or alread visited robot.
@@ -335,12 +540,21 @@ Agent::AgentState Agent::startAgent()
 						if ((*plannedPathIterator)->occupiedRobot != NULL)
 						{
 							// Room is occupied.
-							nextState = AGENT_STATE_COLLISION;
+							if (mWaitCount++ >= AGENT_MAXWAIT)
+							{
+								mWaitCount = 0;
+								nextState = AGENT_STATE_REPLAN;
+							}
+							else
+								nextState = AGENT_STATE_COLLISION;
+							
 						}
 						else
 						{
 							// Continue search mode.
+							mWaitCount = 0;
 							nextState = AGENT_STATE_SEARCH_MODE;
+
 						}
 					}
 					else

@@ -60,6 +60,7 @@ public:
   const int    mColumn;
   const int	   mCost;
 
+  int	mValue;
   bool	mFlag;
   bool	mFlagBFS;
   bool	mFlagIDS;

@@ -108,7 +108,7 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 	if (room->hasWest() && (parent_room != NULL) && room->isFree())
 	{
 		// We dont want to go back.
-		if ((room->mWest->mCost < 9) && !(parent_room->mID == room->mWest->mID))
+		if ((room->mWest->mCost < 9) && !(parent_room->mID == room->mWest->mID) )//&& (room->mWest->isFree()))
 		{
 			NewNode = MapSearchNode (room->mWest);
 			astarsearch->AddSuccessor( NewNode );
@@ -119,7 +119,7 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 	if (room->hasSouth()&& (parent_room != NULL) && room->isFree())
 	{
 		// We dont want to go back.
-		if ((room->mSouth->mCost < 9) && !(parent_room->mID == room->mSouth->mID))
+		if ((room->mSouth->mCost < 9) && !(parent_room->mID == room->mSouth->mID) )//&& (room->mSouth->isFree()))
 		{
 			NewNode = MapSearchNode (room->mSouth);
 			astarsearch->AddSuccessor( NewNode );
@@ -130,7 +130,7 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 	if (room->hasEast()&& (parent_room != NULL) && room->isFree())
 	{
 		// We dont want to go back.
-		if ((room->mEast->mCost < 9) && !(parent_room->mID == room->mEast->mID))
+		if ((room->mEast->mCost < 9) && !(parent_room->mID == room->mEast->mID) )//&& (room->mEast->isFree()))
 		{
 			NewNode = MapSearchNode (room->mEast);
 			astarsearch->AddSuccessor( NewNode );
@@ -141,7 +141,7 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 	if (room->hasNorth() && (parent_room != NULL) && room->isFree())
 	{
 		// We dont want to go back.
-		if ((room->mNorth->mCost < 9) && !(parent_room->mID == room->mNorth->mID))
+		if ((room->mNorth->mCost < 9) && !(parent_room->mID == room->mNorth->mID))//&& (room->mNorth->isFree()))
 		{
 			NewNode = MapSearchNode (room->mNorth);
 			astarsearch->AddSuccessor( NewNode );
