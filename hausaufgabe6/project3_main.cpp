@@ -132,8 +132,8 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (10)
-#define N_COLUMNS (10)
+#define N_ROWS    (5)
+#define N_COLUMNS (5)
 
 /*****************************************************************
  * Local Types
@@ -290,20 +290,21 @@ dumpTxt (Rooms & rooms, Room * first, Room * last, Room * third, Room * forth)
 
 	  if (hasFirstAndLast)
 	    {
-	      if (rooms[i][j] == first)
-		c = '1';
+	      if (rooms[i][j]->occupiedRobot)
+			  c =  0x30 +  rooms[i][j]->occupiedRobot->getID() ;
+		 
 
-	      else if (rooms[i][j] == last)
-		c = '2';
-		  	      else if (rooms[i][j] == third)
-		c = '3';
-		  	      else if (rooms[i][j] == forth)
-		c = '4';
-		  else if (rooms[i][j]->mFlag || rooms[i][j]->mFlagBFS || rooms[i][j]->mFlagIDS|| rooms[i][j]->mFlagAstar )
+	 //     else if (rooms[i][j] == last)
+		//c = '2';
+		//  	      else if (rooms[i][j] == third)
+		//c = '3';
+		//  	      else if (rooms[i][j] == forth)
+		//c = '4';
+	//	 if ( rooms[i][j]->mFlagAstar )
 		//c= 'x';
-		c = 0xB2;
-		  else if (rooms[i][j]->mFlagAstar)
-		c= 'a';
+		//c = 0xB2;
+		//  else if (rooms[i][j]->mFlagAstar)
+		//c= 'a';
 		  
 	
 
@@ -821,10 +822,25 @@ static void	initAgents(int agentNumbers, vector <Agent> &setAgents, Rooms _rooms
 {
 	Agent tempAgent;
 	vector <Agent *> tempSetAgents;
-	
+	bool duplicate;
+
 	for (int loop = 0; loop < agentNumbers; loop++)
 	{
-	  tempAgent.currentRoom = getRandomRoom(_rooms);
+	  do 
+	  {
+		duplicate = 0;		
+		  tempAgent.currentRoom = getRandomRoom(_rooms);
+		// check if room is alread occupied
+		for (int i=0; i<setAgents.size();i++)
+			{
+			if (setAgents[i].currentRoom == tempAgent.currentRoom)
+				{
+				duplicate = 1;
+				cout << "gewaehlter Raum (random) bereits besetzt -> neuer Raum wird gewaehlt" << endl;
+				}
+			}
+	   } while (duplicate == 1);
+
 	  tempAgent.nextRoom = NULL;
 	  tempAgent.setID(loop);
 	 
@@ -1090,30 +1106,42 @@ int main (int argc, char **argv)
   rForth = agentList[3].getCurrent();
 
 
-	agentList[0].targetRoom = agentList[1].currentRoom;
-	ROBOTSEARCH(&agentList[0]);
-	agentList[1].targetRoom = agentList[0].currentRoom;
-	ROBOTSEARCH(&agentList[1]);
-	agentList[2].targetRoom = agentList[3].currentRoom;
-	ROBOTSEARCH(&agentList[2]);
-	agentList[3].targetRoom = agentList[2].currentRoom;
-	ROBOTSEARCH(&agentList[3]);
+//	agentList[0].targetRoom = agentList[1].currentRoom;
+	agentList[0].setTarget(&agentList[1]);
+	agentList[1].setTarget(&agentList[0]);
+	agentList[2].setTarget(&agentList[3]);
+	agentList[3].setTarget(&agentList[2]);
+//	ROBOTSEARCH(&agentList[0]);
+//	agentList[0].planPath(agentList[0].targetRoom);
+	//agentList[1].targetRoom = agentList[0].currentRoom;
+//	ROBOTSEARCH(&agentList[1]);
+	//agentList[2].targetRoom = agentList[3].currentRoom;
+//	ROBOTSEARCH(&agentList[2]);
+	//agentList[3].targetRoom = agentList[2].currentRoom;
+//	ROBOTSEARCH(&agentList[3]);
 	//agentList[0].plannedPathIterator
+
 	
-	do
+	for (int i = 0; i < 10; i++)
 	{
-	
-	
 	Sleep(600);
 	system("cls"); 
 	agentList[0].startAgent();
+	agentList[1].startAgent();
 	agentList[2].startAgent();
 	agentList[3].startAgent();
 	void (*dump) (Rooms &, Room *, Room *, Room *, Room *) = dumpTxt;
 	dump (rooms, rFirst, rLast, rThird, rForth);
+	}
 	
-
-	} while (true);
+  for (int i= 0; i < agentList.size(); i++)
+  {
+	  printf ("Agent Nr: %d \n",agentList[i].getID()); 
+	    for (int j= 0; j < agentList[i].visitedAgentsList.size(); j++)
+	     printf ("Agent from List :%d\n", agentList[i].visitedAgentsList[j]->getID());
+	    for (int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
+			  printf ("Agent from NOTList :%d\n", agentList[i].notvisitedAgents[z]->getID());
+  }
   //vector <Agent>::iterator i;
 	/*
   for (int i= 0; i < agentList.size(); i++)
