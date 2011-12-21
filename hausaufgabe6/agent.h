@@ -15,6 +15,7 @@
 #define _INCL_AGENT
 
 #define AGENT_MAXWAIT 0
+#define	AGENT_MAXSEARCH 100
 // stl includes
 #include <algorithm>
 #include <set>
@@ -43,6 +44,7 @@ class Agent
 {
 	friend bool operator==(const Agent&, const Agent&);
 
+public:
 	enum AgentState
 	{
 		AGENT_STATE_NOT_INITIALISED,
@@ -78,13 +80,16 @@ public:
 	void	setCurrentState(AgentState setState);
 	void	setNext (Room* setRoom);
 	void	setnotvisitedAgents(vector <Agent *> setnotvisited);
+	void	updateDistanceList();
+
 	bool	initDistanceMap();
 
 	bool	planPath(Room * targetAgent);
 	bool	alreadyTouched (Agent * contactAgent);
 
+	Agent*	getClosestTarget(Agent* oldTarget);
 	Agent*	getTarget(); 
-
+	
 	// get Raum
 	Room*	getNext() { return nextRoom;}
 	Room*	getCurrent() { return currentRoom;}
@@ -97,7 +102,7 @@ public:
 
 
 
-	AgentState startAgent();
+	int startAgent();
 
 	// Geplanter Weg
 
@@ -110,7 +115,7 @@ public:
 
 	visitedAgentsIterator findVisitedAgent (Agent * contactAgent);
 
-
+	AgentState publicState;
 protected:
 
 private:

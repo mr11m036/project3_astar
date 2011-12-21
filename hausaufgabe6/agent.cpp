@@ -37,6 +37,35 @@ bool operator==(const Agent& x, const Agent& y)
 	return (x.aID == y.aID);
 }
 
+Agent*	Agent::getClosestTarget(Agent* oldTarget)
+{
+	float tempValue = AGENT_MAXSEARCH;
+	mapDistanceIterator tempIt;
+	mapDistanceReturnPair tempReturn;
+	Agent* returnValue = NULL;
+
+	tempIt = distanceHeuristic.begin();
+
+	while (tempIt != distanceHeuristic.end())
+	{
+		if ((tempIt->second < tempValue) && (tempIt->first != this) && (tempIt->first != oldTarget))
+		{
+			tempValue = tempIt->second;
+			// get Agent. Its niot itselft tbecause of if clause.
+			returnValue = tempIt->first;
+		}
+		else
+		{
+			tempValue = tempValue;
+		}
+
+		tempIt++;
+	}
+
+	return	returnValue;
+ 
+}
+
 Agent* Agent::getTarget()
 {
 	return targetAgent;
@@ -48,6 +77,9 @@ bool Agent::alreadyTouched (Agent * contactAgent)
 	/* http://stackoverflow.com/questions/571394/how-to-find-an-item-in-a-stdvector */
 	
 	visitedAgentsIterator resultIterator;
+
+	if (contactAgent == NULL)
+		return false;
 
 	resultIterator = find (visitedAgentsList.begin(), visitedAgentsList.end(), contactAgent);
 
@@ -216,7 +248,6 @@ void Agent::pushToNotVisitedList(Agent* setTarget)
 void Agent::setTarget(Agent* setTarget)
 {
 	targetAgent = setTarget;
-	//notvisitedAgents.push_back(setTarget);
 }
 
 void Agent::scanAgents()
@@ -237,7 +268,14 @@ void Agent::scanAgents()
 				{
 					notvisitedAgents.erase(tempIt);
 				}
-							
+
+				//if (currentRoom->mEast->occupiedRobot == targetAgent)
+				//{
+				//	// Erase the current target. We foudn it.
+				//	targetAgent = NULL;
+				//	targetRoom = this->currentRoom;
+				//}
+			
 			}
 		}
 	}
@@ -246,13 +284,23 @@ void Agent::scanAgents()
 	{
 		if (currentRoom->mNorth->occupiedRobot != NULL)
 		{
-			// Add this robot to the visted List
-			tempIt = findVisitedAgent(currentRoom->mNorth->occupiedRobot);
-			Agent::visitedAgentsList.push_back(currentRoom->mNorth->occupiedRobot);
-						
-			if (tempIt != notvisitedAgents.end())
+			if (!Agent::alreadyTouched(currentRoom->mNorth->occupiedRobot))
 			{
-				notvisitedAgents.erase(tempIt);
+				// Add this robot to the visted List
+				tempIt = findVisitedAgent(currentRoom->mNorth->occupiedRobot);
+				Agent::visitedAgentsList.push_back(currentRoom->mNorth->occupiedRobot);
+						
+				if (tempIt != notvisitedAgents.end())
+				{
+					notvisitedAgents.erase(tempIt);
+				}
+
+				//if (currentRoom->mNorth->occupiedRobot == targetAgent)
+				//{
+				//	// Erase the current target. We foudn it.
+				//	targetAgent = NULL;
+				//	targetRoom = this->currentRoom;
+				//}
 			}
 		}
 	}
@@ -261,13 +309,23 @@ void Agent::scanAgents()
 	{
 		if (currentRoom->mSouth->occupiedRobot != NULL)
 		{
-			// Add this robot to the visted List
-			tempIt = findVisitedAgent(currentRoom->mSouth->occupiedRobot);
-			Agent::visitedAgentsList.push_back(currentRoom->mSouth->occupiedRobot);
-						
-			if (tempIt != notvisitedAgents.end())
+			if (!Agent::alreadyTouched(currentRoom->mSouth->occupiedRobot))
 			{
-				notvisitedAgents.erase(tempIt);
+				// Add this robot to the visted List
+				tempIt = findVisitedAgent(currentRoom->mSouth->occupiedRobot);
+				Agent::visitedAgentsList.push_back(currentRoom->mSouth->occupiedRobot);
+						
+				if (tempIt != notvisitedAgents.end())
+				{
+					notvisitedAgents.erase(tempIt);
+				}
+				
+				//if (currentRoom->mSouth->occupiedRobot == targetAgent)
+				//{
+				//	// Erase the current target. We foudn it.
+				//	targetAgent = NULL;
+				//	targetRoom = this->currentRoom;
+				//}
 			}
 		}
 	}
@@ -276,13 +334,23 @@ void Agent::scanAgents()
 	{
 		if (currentRoom->mWest->occupiedRobot != NULL)
 		{
-			// Add this robot to the visted List
-			tempIt = findVisitedAgent(currentRoom->mWest->occupiedRobot);
-			Agent::visitedAgentsList.push_back(currentRoom->mWest->occupiedRobot);
-						
-			if (tempIt != notvisitedAgents.end())
+			if (!Agent::alreadyTouched(currentRoom->mWest->occupiedRobot))
 			{
-				notvisitedAgents.erase(tempIt);
+				// Add this robot to the visted List
+				tempIt = findVisitedAgent(currentRoom->mWest->occupiedRobot);
+				Agent::visitedAgentsList.push_back(currentRoom->mWest->occupiedRobot);
+						
+				if (tempIt != notvisitedAgents.end())
+				{
+					notvisitedAgents.erase(tempIt);
+				}
+
+				//if (currentRoom->mWest->occupiedRobot == targetAgent)
+				//{
+				//	// Erase the current target. We foudn it.
+				//	targetAgent = NULL;
+				//	targetRoom = this->currentRoom;
+				//}
 			}
 		}
 	}
@@ -339,6 +407,20 @@ float	Agent::getEstimateDistance (Agent* solverAgent ,Agent* targetAgent)
 	return returnvalue;
 }
 
+void	Agent::updateDistanceList()
+{
+	mapDistanceIterator mapIt;
+
+	mapIt = distanceHeuristic.begin();
+
+	while (mapIt != distanceHeuristic.end())
+	{
+		mapIt->second = getEstimateDistance(this, mapIt->first);
+		mapIt++;
+	}
+
+}
+
 bool	Agent::initDistanceMap()
 {
 	bool returnval = false;
@@ -371,7 +453,7 @@ void	Agent::setnotvisitedAgents(vector <Agent *> setnotvisited)
 	notvisitedAgents = setnotvisited;
 }
 
-Agent::AgentState Agent::startAgent()
+int Agent::startAgent()
 {
 	// Agent State machine
 	visitedAgentsIterator tempIt;
@@ -398,12 +480,7 @@ Agent::AgentState Agent::startAgent()
 				}
 
 				Agent::nextState = AGENT_STATE_NOT_INITIALISED;
-				/*try
-				{
-				}
-				catch (int e)
-				{
-				}*/
+
 				 //TODO check before planning. change to target Agent type instead of Room.
 				if (targetAgent)
 				{
@@ -425,8 +502,6 @@ Agent::AgentState Agent::startAgent()
 					if ((currentRoom->occupiedRobot == NULL) || (currentRoom->occupiedRobot == this))
 					{
 						currentRoom->occupiedRobot = this;
-						
-
 					}
 					else
 					{
@@ -455,7 +530,7 @@ Agent::AgentState Agent::startAgent()
 			break;
  
 			case AGENT_STATE_SEARCH_MODE: 
-
+				//(void) updateDistanceList();
 				(void) scanAgents();
 
 				// run strategy to find other robots
@@ -471,11 +546,13 @@ Agent::AgentState Agent::startAgent()
 					{
 						// TODO´: define new target
 						//		  depends on strategy
+						Agent::nextState = AGENT_STATE_REPLAN;
 					}
 
 				}
 				else //von if (Agent::plannedPath.empty())
 				{
+					Agent::nextState = AGENT_STATE_REPLAN;
 					 // TODO: Check if target moved. Recalculate or so.d.
 				}
 
@@ -484,6 +561,8 @@ Agent::AgentState Agent::startAgent()
 			break;
 
 			case AGENT_STATE_REPLAN:
+
+				
 
 				if (!(plannedPathIterator == plannedPath.end()) && targetAgent)
 				{
@@ -508,7 +587,24 @@ Agent::AgentState Agent::startAgent()
 					else
 					{
 						// find new target.
-						nextState = AGENT_STATE_REPLAN;
+						(void) updateDistanceList();
+						targetAgent = getClosestTarget(targetAgent);
+						
+						if (targetAgent)
+						{
+							if (targetAgent->currentRoom)
+							{
+								targetRoom = targetAgent->currentRoom;
+								Agent::planPath(targetRoom);
+								Agent::nextState = AGENT_STATE_SEARCH_MODE;
+							}
+						}
+						else
+						{
+							// No target
+							Agent::nextState = AGENT_STATE_REPLAN;
+						}
+
 					}
 				}
 				else
@@ -523,7 +619,23 @@ Agent::AgentState Agent::startAgent()
 					else
 					{
 						// find new target.
-						nextState = AGENT_STATE_REPLAN;
+						(void) updateDistanceList();
+						targetAgent = getClosestTarget(targetAgent);
+						
+						if (targetAgent)
+						{
+							if (targetAgent->currentRoom)
+							{
+								targetRoom = targetAgent->currentRoom;
+								Agent::planPath(targetRoom);
+								Agent::nextState = AGENT_STATE_SEARCH_MODE;
+							}
+						}
+						else
+						{
+							// No target
+							Agent::nextState = AGENT_STATE_REPLAN;
+						}
 					}
 				}
 				
@@ -552,14 +664,22 @@ Agent::AgentState Agent::startAgent()
 						else
 						{
 							// Continue search mode.
-							mWaitCount = 0;
+							//mWaitCount = 0;
 							nextState = AGENT_STATE_SEARCH_MODE;
 
 						}
 					}
 					else
 					{
-						nextState = AGENT_STATE_COMPLETE;
+						// if list is empty
+						if (notvisitedAgents.empty())
+						{
+							nextState = AGENT_STATE_COMPLETE;
+						}
+						else
+						{
+							nextState =	AGENT_STATE_REPLAN;
+						}
 					}
 
 			break;

@@ -132,8 +132,8 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (5)
-#define N_COLUMNS (5)
+#define N_ROWS    (10)
+#define N_COLUMNS (10)
 
 /*****************************************************************
  * Local Types
@@ -185,14 +185,14 @@ getArgs (int argc,
 
 static void seedRandom ()
 {
-  srand (time (NULL));
+  srand ((unsigned int)time (NULL));
 }
 
 static string toString (long value)
 {
   char buffer[255] = { '\0' };
 
-  sprintf (buffer, "%ld", value);
+  sprintf_s (buffer, 255, "%ld", value);
 
   string s = buffer;
 
@@ -831,7 +831,7 @@ static void	initAgents(int agentNumbers, vector <Agent> &setAgents, Rooms _rooms
 		duplicate = 0;		
 		  tempAgent.currentRoom = getRandomRoom(_rooms);
 		// check if room is alread occupied
-		for (int i=0; i<setAgents.size();i++)
+		for (unsigned int i=0; i<setAgents.size();i++)
 			{
 			if (setAgents[i].currentRoom == tempAgent.currentRoom)
 				{
@@ -1121,34 +1121,38 @@ int main (int argc, char **argv)
 //	ROBOTSEARCH(&agentList[3]);
 	//agentList[0].plannedPathIterator
 
-	
-	for (int i = 0; i < 10; i++)
+	//vector <Agent::AgentState> tempStates;
+	vector<int> tempRes;
+	int iteratNR = 0;
+	for (int i = 0; i < 50; i++)
 	{
 	Sleep(600);
 	system("cls"); 
-	agentList[0].startAgent();
-	agentList[1].startAgent();
-	agentList[2].startAgent();
-	agentList[3].startAgent();
+	tempRes.push_back  (agentList[0].startAgent());
+	tempRes.push_back (agentList[1].startAgent());
+	tempRes.push_back (agentList[2].startAgent());
+	tempRes.push_back  (agentList[3].startAgent());
 	void (*dump) (Rooms &, Room *, Room *, Room *, Room *) = dumpTxt;
 	dump (rooms, rFirst, rLast, rThird, rForth);
+
+	printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DONE");
+	for (unsigned int i= 0; i < agentList.size(); i++)
+	{
+		printf ("\nAgent Nr %d Target: %d: State: %d  ",agentList[i].getID(), agentList[i].getTarget()->getID(), tempRes[i+iteratNR*3]); 
+		for (unsigned int j= 0; j < agentList[i].visitedAgentsList.size(); j++)
+		{	
+			printf ("v-%d |", agentList[i].visitedAgentsList[j]->getID());
+		}
+		for (unsigned int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
+		{	
+			printf ("n-%d |", agentList[i].notvisitedAgents[z]->getID());
+		}
+	}
+	iteratNR++;
+
 	}
 	
-  for (int i= 0; i < agentList.size(); i++)
-  {
-	  printf ("Agent Nr: %d \n",agentList[i].getID()); 
-	    for (int j= 0; j < agentList[i].visitedAgentsList.size(); j++)
-	     printf ("Agent from List :%d\n", agentList[i].visitedAgentsList[j]->getID());
-	    for (int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
-			  printf ("Agent from NOTList :%d\n", agentList[i].notvisitedAgents[z]->getID());
-  }
-  //vector <Agent>::iterator i;
-	/*
-  for (int i= 0; i < agentList.size(); i++)
-  {
-	  printf ("Agent :%d\n", agentList[i].getID());
-  }*/
- 
+
 
   return (0);
 }
