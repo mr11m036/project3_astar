@@ -32,7 +32,8 @@ public:
 	//unsigned int x;	 // the (x,y) positions of the node
 	//unsigned int y;	
 	Room* room;
-	
+
+
 	MapSearchNode() { room = NULL; }
 	MapSearchNode( Room * setRoom ) { room=setRoom; }
 

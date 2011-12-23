@@ -125,9 +125,10 @@ bool Agent::planPath(Room* targetAgent)
 
 		// Define the goal state
 		MapSearchNode nodeEnd;
-		nodeEnd.room =  targetRoom;// targetAgent->currentRoom; // TODO: Use TargetAgent instead? Or set targetRoom when selecting targetAgent
+		nodeEnd.room =  targetAgent;// targetAgent->currentRoom; // TODO: Use TargetAgent instead? Or set targetRoom when selecting targetAgent
 
 		// Set Start and goal states
+		
 		astarsearch.SetStartAndGoalStates( nodeStart, nodeEnd );
 
 		unsigned int SearchState;
@@ -383,7 +384,7 @@ void Agent::moveAgent()
 	else
 	{
 						
-		nextState = AGENT_STATE_COMPLETE;
+		nextState = AGENT_STATE_REPLAN;
 	}
 }
 
@@ -534,7 +535,7 @@ int Agent::startAgent()
 				(void) scanAgents();
 
 				// run strategy to find other robots
-				if (Agent::plannedPath.empty())
+				if (Agent::plannedPathIterator == plannedPath.end())
 				{
 					// TODO: Check if some robots still in not visited Queue.
 					if (Agent::notvisitedAgents.empty())
@@ -552,7 +553,7 @@ int Agent::startAgent()
 				}
 				else //von if (Agent::plannedPath.empty())
 				{
-					Agent::nextState = AGENT_STATE_REPLAN;
+					//Agent::nextState = AGENT_STATE_REPLAN;
 					 // TODO: Check if target moved. Recalculate or so.d.
 				}
 
@@ -562,82 +563,37 @@ int Agent::startAgent()
 
 			case AGENT_STATE_REPLAN:
 
-				
 
-				if (!(plannedPathIterator == plannedPath.end()) && targetAgent)
+				if (alreadyTouched(targetAgent))
 				{
-					if (!alreadyTouched(targetAgent))
-					{
-						// Search new path to current target.
-						if (targetAgent)
-						{
-							if (targetAgent->currentRoom)
-							{
-								targetRoom = targetAgent->currentRoom;
-								Agent::planPath(targetRoom);
-								Agent::nextState = AGENT_STATE_SEARCH_MODE;
-							}
-						}
-						else
-						{
-							// No target
-							Agent::nextState = AGENT_STATE_REPLAN;
-						}
-					}
-					else
-					{
-						// find new target.
-						(void) updateDistanceList();
-						targetAgent = getClosestTarget(targetAgent);
-						
-						if (targetAgent)
-						{
-							if (targetAgent->currentRoom)
-							{
-								targetRoom = targetAgent->currentRoom;
-								Agent::planPath(targetRoom);
-								Agent::nextState = AGENT_STATE_SEARCH_MODE;
-							}
-						}
-						else
-						{
-							// No target
-							Agent::nextState = AGENT_STATE_REPLAN;
-						}
+					// get next target
+					(void) updateDistanceList();
+					targetAgent = getClosestTarget(targetAgent);
+					targetRoom = targetAgent->currentRoom;
 
-					}
+					(void) plannedPath.clear();
+
+					if (planPath(targetRoom))
+						plannedPathIterator = plannedPath.begin();
+					else
+						plannedPathIterator = plannedPath.end();
+
 				}
 				else
 				{
-					if (!alreadyTouched(targetAgent))
-					{
-						// Search new path to current target.
-						targetRoom = targetAgent->currentRoom;
-						Agent::planPath(targetRoom);
-						Agent::nextState = AGENT_STATE_SEARCH_MODE;
-					}
+					// get a new path to current target
+					(void) plannedPath.clear();
+					targetRoom = targetAgent->currentRoom;
+
+					if (planPath(targetRoom))
+						plannedPathIterator = plannedPath.begin();
 					else
-					{
-						// find new target.
-						(void) updateDistanceList();
-						targetAgent = getClosestTarget(targetAgent);
-						
-						if (targetAgent)
-						{
-							if (targetAgent->currentRoom)
-							{
-								targetRoom = targetAgent->currentRoom;
-								Agent::planPath(targetRoom);
-								Agent::nextState = AGENT_STATE_SEARCH_MODE;
-							}
-						}
-						else
-						{
-							// No target
-							Agent::nextState = AGENT_STATE_REPLAN;
-						}
-					}
+						plannedPathIterator = plannedPath.end();
 				}
+			
+				nextState = AGENT_STATE_SEARCH_MODE;
+
+
 				
 				
 			break;

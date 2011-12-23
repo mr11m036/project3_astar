@@ -43,6 +43,7 @@ typedef pair <Agent *, float> mapDistanceInsertPair;
 class Agent
 {
 	friend bool operator==(const Agent&, const Agent&);
+	friend class MapSearchNode;
 
 public:
 	enum AgentState
