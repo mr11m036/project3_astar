@@ -82,12 +82,13 @@ public:
 	void	setNext (Room* setRoom);
 	void	setnotvisitedAgents(vector <Agent *> setnotvisited);
 	void	updateDistanceList();
-
+	void	keepDistance();
 	bool	initDistanceMap();
 
 	bool	planPath(Room * targetAgent);
 	bool	alreadyTouched (Agent * contactAgent);
-
+	bool	agentInVector (Agent * contactAgent, listAgents &searchVector); 
+	Agent*	getClosestTarget(listAgents &oldTarget);
 	Agent*	getClosestTarget(Agent* oldTarget);
 	Agent*	getTarget(); 
 	

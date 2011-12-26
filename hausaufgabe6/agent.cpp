@@ -36,6 +36,93 @@ bool operator==(const Agent& x, const Agent& y)
 {
 	return (x.aID == y.aID);
 }
+void Agent::keepDistance()
+{
+	// This function keeps the max distance to all other agents. It therefore calculates the
+	// heuristic f+g from all adjacent nodes to all other agents
+	map <float, Room *> hxRoom;
+	map <float, Room *>::iterator hxRoomIterator;
+	pair <float, Room*> hxRoomInsert;
+	float distanceHxNorth = 0;
+	float distanceHxSouth = 0;
+	float distanceHxWest = 0;
+	float distanceHxEast = 0;
+	
+	Agent dummyAgent;
+	
+	(void) updateDistanceList();
+	(void) plannedPath.clear();
+	
+	mapDistanceIterator mapIt;
+	mapIt = distanceHeuristic.begin();
+
+	visitedAgentsIterator tempIt;
+	// Check if there is an agent in an adjacent room.
+	if (currentRoom->hasEast())
+	{
+		mapIt = distanceHeuristic.begin();
+		dummyAgent.currentRoom = currentRoom->getEast();
+		while (mapIt != distanceHeuristic.end())
+		{
+			distanceHxEast += getEstimateDistance(&dummyAgent, mapIt->first);
+			mapIt++;
+		}	
+
+		hxRoomInsert.first = (float)distanceHxEast;
+		hxRoomInsert.second = currentRoom->mEast;
+		hxRoom.insert(hxRoomInsert);
+	}
+				
+	if (currentRoom->hasNorth())
+	{
+		mapIt = distanceHeuristic.begin();
+		dummyAgent.currentRoom = currentRoom->getNorth();
+		while (mapIt != distanceHeuristic.end())
+		{
+			distanceHxNorth += getEstimateDistance(&dummyAgent, mapIt->first);
+			mapIt++;
+		}	
+		hxRoomInsert.first = (float)distanceHxNorth;
+		hxRoomInsert.second = currentRoom->mNorth;
+		hxRoom.insert(hxRoomInsert);
+	}
+				
+	if (currentRoom->hasSouth())
+	{
+		mapIt = distanceHeuristic.begin();
+		dummyAgent.currentRoom = currentRoom->getSouth();
+		while (mapIt != distanceHeuristic.end())
+		{
+			distanceHxSouth += getEstimateDistance(&dummyAgent, mapIt->first);
+			mapIt++;
+		}	
+		hxRoomInsert.first = (float)distanceHxSouth;
+		hxRoomInsert.second = currentRoom->mSouth;
+		hxRoom.insert(hxRoomInsert);
+	}
+				
+	if (currentRoom->hasWest())
+	{
+		mapIt = distanceHeuristic.begin();
+		dummyAgent.currentRoom = currentRoom->getWest();
+		while (mapIt != distanceHeuristic.end())
+		{
+			distanceHxWest += getEstimateDistance(&dummyAgent, mapIt->first);
+			mapIt++;
+		}
+		
+		hxRoomInsert.first = (float)distanceHxWest;
+		hxRoomInsert.second = currentRoom->mWest;
+		hxRoom.insert(hxRoomInsert);
+	}
+
+	hxRoomIterator = hxRoom.end();
+	hxRoomIterator --;
+
+	plannedPath.push_back(hxRoomIterator->second);
+	plannedPathIterator = plannedPath.begin();
+	// Endof Robot check for visted agents
+}
 
 Agent*	Agent::getClosestTarget(Agent* oldTarget)
 {
@@ -48,7 +135,36 @@ Agent*	Agent::getClosestTarget(Agent* oldTarget)
 
 	while (tempIt != distanceHeuristic.end())
 	{
-		if ((tempIt->second < tempValue) && (tempIt->first != this) && (tempIt->first != oldTarget))
+		if ((tempIt->second < tempValue) && (tempIt->first != this) && (tempIt->first != oldTarget) && (!alreadyTouched(tempIt->first)))
+		{
+			tempValue = tempIt->second;
+			// get Agent. Its niot itselft tbecause of if clause.
+			returnValue = tempIt->first;
+		}
+		else
+		{
+			tempValue = tempValue;
+		}
+
+		tempIt++;
+	}
+
+	return	returnValue;
+ 
+}
+
+Agent*	Agent::getClosestTarget(listAgents &oldTarget)
+{
+	float tempValue = AGENT_MAXSEARCH;
+	mapDistanceIterator tempIt;
+	mapDistanceReturnPair tempReturn;
+	Agent* returnValue = NULL;
+
+	tempIt = distanceHeuristic.begin();
+
+	while (tempIt != distanceHeuristic.end())
+	{
+		if ((tempIt->second < tempValue) && (tempIt->first != this) && (!agentInVector(tempIt->first,oldTarget) && (!alreadyTouched(tempIt->first))))
 		{
 			tempValue = tempIt->second;
 			// get Agent. Its niot itselft tbecause of if clause.
@@ -71,7 +187,26 @@ Agent* Agent::getTarget()
 	return targetAgent;
 }
 
-bool Agent::alreadyTouched (Agent * contactAgent)
+bool	Agent::agentInVector (Agent * contactAgent, listAgents &searchVector)
+{
+	listAgentsIterator resultIterator;
+
+	if (contactAgent == NULL)
+	return false;
+
+	resultIterator = find (searchVector.begin(), searchVector.end(), contactAgent);
+
+	if (resultIterator != searchVector.end())
+	{
+		return (true);
+	}
+	else
+	{
+		return (false);
+	}
+}	
+	
+	bool Agent::alreadyTouched (Agent * contactAgent)
 {
 	// search in visited list if robot was already touched.
 	/* http://stackoverflow.com/questions/571394/how-to-find-an-item-in-a-stdvector */
@@ -381,11 +516,11 @@ void Agent::moveAgent()
 			plannedPathIterator++;
 		}
 	}
-	else
-	{
-						
-		nextState = AGENT_STATE_REPLAN;
-	}
+	//else
+	//{
+	//	if (currentState != AGENT_STATE_COMPLETE)				
+	//		nextState = AGENT_STATE_REPLAN;
+	//}
 }
 
 float	Agent::getEstimateDistance (Agent* solverAgent ,Agent* targetAgent)
@@ -458,13 +593,25 @@ int Agent::startAgent()
 {
 	// Agent State machine
 	visitedAgentsIterator tempIt;
+	listAgents exclusionVector;
+	Agent* oldTarget;
+	bool searchFalg = false;
 
 	switch(currentState)
 	{
 			case AGENT_STATE_NOT_INITIALISED:
+	
+				// Plan Path.
+				Agent::nextState = AGENT_STATE_REPLAN;
+				
 				// Delete own reference in not visited list.
-				//notvisitedAgents.fi
 				tempIt = findVisitedAgent(this);
+				
+				if (tempIt != notvisitedAgents.end())
+				{
+					notvisitedAgents.erase(tempIt);
+				}
+
 				// Init distance map.
 				try
 				{
@@ -473,33 +620,13 @@ int Agent::startAgent()
 				}
 				catch (int e)
 				{
+					cout << "An exception occurred. Exception Nr. " << e << endl;
+					nextState = AGENT_STATE_NOT_INITIALISED;
 				}
 
-				if (tempIt != notvisitedAgents.end())
-				{
-					notvisitedAgents.erase(tempIt);
-				}
-
-				Agent::nextState = AGENT_STATE_NOT_INITIALISED;
-
-				 //TODO check before planning. change to target Agent type instead of Room.
-				if (targetAgent)
-				{
-					if (targetAgent->currentRoom)
-					{
-						targetRoom = targetAgent->currentRoom;
-						Agent::planPath(targetRoom);
-					}
-				}
-				else
-				{
-					// No target
-					Agent::nextState = AGENT_STATE_NOT_INITIALISED;
-				}
-				//Agent::planPath(targetRoom);
+				// Set prime marker (pointer to robot and flag) on maze.
 				try
 				{
-					// Set prime marker (pointer to robot and flag) on maze.
 					if ((currentRoom->occupiedRobot == NULL) || (currentRoom->occupiedRobot == this))
 					{
 						currentRoom->occupiedRobot = this;
@@ -514,19 +641,43 @@ int Agent::startAgent()
 				catch (int e)
 				{
 					 cout << "An exception occurred. Exception Nr. " << e << endl;
+					 Agent::nextState = AGENT_STATE_NOT_INITIALISED;
 				}
+
+				// Get first target.
+					
+				(void) updateDistanceList();
+				targetAgent = getClosestTarget(targetAgent);
+				targetRoom = targetAgent->currentRoom;
+
+				// //TODO check before planning. change to target Agent type instead of Room.
+				//if (targetAgent)
+				//{
+				//	if (targetAgent->currentRoom)
+				//	{
+				//		targetRoom = targetAgent->currentRoom;
+				//		Agent::planPath(targetRoom);
+				//	}
+				//}
+				//else
+				//{
+				//	// No target.
+				//	Agent::nextState = AGENT_STATE_REPLAN;
+				//}
+				//Agent::planPath(targetRoom);
+
 				// set first target
 				// plannedPath is alread next Room.
 
-				if (!plannedPath.empty() && (currentRoom->occupiedRobot == this))
-				{
-					plannedPathIterator = plannedPath.begin();
-					Agent::nextState = AGENT_STATE_SEARCH_MODE;
-				}
-				else
-				{
-					Agent::nextState = AGENT_STATE_NOT_INITIALISED;
-				}
+				//if (!plannedPath.empty() && (currentRoom->occupiedRobot == this))
+				//{
+				//	plannedPathIterator = plannedPath.begin();
+				//	Agent::nextState = AGENT_STATE_SEARCH_MODE;
+				//}
+				//else
+				//{
+				//	Agent::nextState = AGENT_STATE_NOT_INITIALISED;
+				//}
 
 			break;
  
@@ -558,44 +709,60 @@ int Agent::startAgent()
 				}
 
 				(void) moveAgent();
+				if (currentState == AGENT_STATE_COMPLETE)
+					nextState = AGENT_STATE_COMPLETE;
 				
 			break;
 
 			case AGENT_STATE_REPLAN:
 
+				(void) updateDistanceList();
+				(void) plannedPath.clear();
+				(void) exclusionVector.clear();
+				
 
-				if (alreadyTouched(targetAgent))
-				{
-					// get next target
-					(void) updateDistanceList();
-					targetAgent = getClosestTarget(targetAgent);
-					targetRoom = targetAgent->currentRoom;
+				exclusionVector.push_back(this);
+				oldTarget = targetAgent;
 
-					(void) plannedPath.clear();
-
-					if (planPath(targetRoom))
-						plannedPathIterator = plannedPath.begin();
-					else
-						plannedPathIterator = plannedPath.end();
-
-				}
-				else
-				{
-					// get a new path to current target
-					(void) plannedPath.clear();
-					targetRoom = targetAgent->currentRoom;
-
-					if (planPath(targetRoom))
-						plannedPathIterator = plannedPath.begin();
-					else
-						plannedPathIterator = plannedPath.end();
-				}
-			
+				if (targetAgent)
+					if (alreadyTouched(targetAgent))
+						exclusionVector.push_back(targetAgent);
+				
 				nextState = AGENT_STATE_SEARCH_MODE;
 
+				do
+				{
+					// Try to find a new target.
+					targetAgent = getClosestTarget(exclusionVector);
+					if (targetAgent)
+					{
+						targetRoom = targetAgent->currentRoom;
+						if (planPath(targetRoom))
+						{	
+							plannedPathIterator = plannedPath.begin();
+							searchFalg = true;
+						}
+					}
+					else
+					{
+						targetAgent = oldTarget;
+						targetRoom = targetAgent->currentRoom;
+						searchFalg = true;
+						nextState = AGENT_STATE_REPLAN; // This should be changed to another state to get some distance from the other agents.
+					}
+						// we need to wait until any target gets reachable
+					exclusionVector.push_back(targetAgent);
 
-				
-				
+				} while (!searchFalg);
+
+				if (Agent::notvisitedAgents.empty())
+					{
+						// No more robots left in queue.
+						Agent::nextState = AGENT_STATE_COMPLETE;
+					}
+
+				if (currentState == AGENT_STATE_COMPLETE)
+					nextState = AGENT_STATE_COMPLETE;
 			break;
 			
 			case AGENT_STATE_COLLISION:
@@ -638,15 +805,22 @@ int Agent::startAgent()
 						}
 					}
 
+					if (currentState == AGENT_STATE_COMPLETE)
+							nextState = AGENT_STATE_COMPLETE;
 			break;
 
 			case AGENT_STATE_COMPLETE:
+
+				keepDistance();
+				moveAgent();
 				// run strategy to evade other robots
-	
+				Agent::nextState = AGENT_STATE_COMPLETE;
 
 			break;
 	}
 
+	if (currentState == AGENT_STATE_COMPLETE)
+		nextState = AGENT_STATE_COMPLETE;
 	currentState = nextState;
 	return currentState;
 }
