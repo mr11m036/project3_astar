@@ -513,7 +513,7 @@ void Agent::scanAgents()
 	// Endof Robot check for visted agents
 }
 
-void Agent::moveAgent()
+void Agent::moveAgent(AgentState targetState)
 {
 	// Room is free.
 	if (!(plannedPathIterator == plannedPath.end()))
@@ -521,7 +521,7 @@ void Agent::moveAgent()
 		if ((*plannedPathIterator)->occupiedRobot != NULL)
 		{
 			// Room is occupied.
-			nextState = AGENT_STATE_COLLISION;
+			nextState = targetState;
 		}
 		else
 		{
@@ -609,7 +609,12 @@ void	Agent::setnotvisitedAgents(vector <Agent *> setnotvisited)
 	notvisitedAgents = setnotvisited;
 }
 
-int Agent::startAgent()
+bool	Agent::isSearchComplete()
+{
+	return bsearchComplete;
+}
+
+unsigned int Agent::startAgent()
 {
 	// Agent State machine
 	visitedAgentsIterator tempIt;
@@ -617,159 +622,186 @@ int Agent::startAgent()
 	Agent* oldTarget;
 	bool searchFalg = false;
 
-	switch(currentState)
+	if (!bsearchComplete)
 	{
-			case AGENT_STATE_NOT_INITIALISED:
+		switch(currentState)
+		{
+				case AGENT_STATE_NOT_INITIALISED:
 	
-				// Plan Path.
-				Agent::nextState = AGENT_STATE_REPLAN;
+					// Plan Path.
+					Agent::nextState = AGENT_STATE_REPLAN;
 				
-				// Delete own reference in not visited list.
-				tempIt = findVisitedAgent(this);
+					// Delete own reference in not visited list.
+					tempIt = findVisitedAgent(this);
 				
-				if (tempIt != notvisitedAgents.end())
-				{
-					notvisitedAgents.erase(tempIt);
-				}
-
-				
-				// Init distance map.
-				try
-				{
-					if (!initDistanceMap())
-						throw AGENT_INIT_ERROR;
-				}
-				catch (int e)
-				{
-					cout << "An exception occurred. Exception Nr. " << e << endl;
-					nextState = AGENT_STATE_NOT_INITIALISED;
-				}
-
-				// Set prime marker (pointer to robot and flag) on maze.
-				try
-				{
-					if ((currentRoom->occupiedRobot == NULL) || (currentRoom->occupiedRobot == this))
+					if (tempIt != notvisitedAgents.end())
 					{
-						currentRoom->occupiedRobot = this;
+						notvisitedAgents.erase(tempIt);
 					}
-					else
-					{
-						// throw exception. Initial Place is occupied. This should not have happened.
-						Agent::nextState = AGENT_STATE_NOT_INITIALISED;
-						throw AGENT_INIT_ERROR;
-					}
-				}
-				catch (int e)
-				{
-					 cout << "An exception occurred. Exception Nr. " << e << endl;
-					 Agent::nextState = AGENT_STATE_NOT_INITIALISED;
-				}
 
-				// Get first target.
+				
+					// Init distance map.
+					try
+					{
+						if (!initDistanceMap())
+							throw AGENT_INIT_ERROR;
+					}
+					catch (int e)
+					{
+						cout << "An exception occurred. Exception Nr. " << e << endl;
+						nextState = AGENT_STATE_NOT_INITIALISED;
+					}
+
+					// Set prime marker (pointer to robot and flag) on maze.
+					try
+					{
+						if ((currentRoom->occupiedRobot == NULL) || (currentRoom->occupiedRobot == this))
+						{
+							currentRoom->occupiedRobot = this;
+						}
+						else
+						{
+							// throw exception. Initial Place is occupied. This should not have happened.
+							Agent::nextState = AGENT_STATE_NOT_INITIALISED;
+							throw AGENT_INIT_ERROR;
+						}
+					}
+					catch (int e)
+					{
+						 cout << "An exception occurred. Exception Nr. " << e << endl;
+						 Agent::nextState = AGENT_STATE_NOT_INITIALISED;
+					}
+
+					// Get first target.
 					
-				(void) updateDistanceList();
-				targetAgent = getClosestTarget(targetAgent);
-				targetRoom = targetAgent->currentRoom;
+					(void) updateDistanceList();
+					targetAgent = getClosestTarget(targetAgent);
+					targetRoom = targetAgent->currentRoom;
 			
 
-			break;
+				break;
  
-			case AGENT_STATE_SEARCH_MODE: 
-				//(void) updateDistanceList();
-				(void) scanAgents();
-
-				// run strategy to find other robots
-				if (Agent::plannedPathIterator == plannedPath.end())
-				{
-					// TODO: Check if some robots still in not visited Queue.
+				case AGENT_STATE_SEARCH_MODE: 
+					//(void) updateDistanceList();
+					(void) scanAgents();
 					if (Agent::notvisitedAgents.empty())
 					{
 						// No more robots left in queue.
 						Agent::nextState = AGENT_STATE_COMPLETE;
+						break;
 					}
-					else
+
+
+					// run strategy to find other robots
+					if (Agent::plannedPathIterator == plannedPath.end())
 					{
-						// TODO´: define new target
-						//		  depends on strategy
 						Agent::nextState = AGENT_STATE_REPLAN;
+						//// TODO: Check if some robots still in not visited Queue.
+						//if (Agent::notvisitedAgents.empty())
+						//{
+						//	// No more robots left in queue.
+						//	Agent::nextState = AGENT_STATE_COMPLETE;
+						//}
+						//else
+						//{
+						//	// TODO´: define new target
+						//	//		  depends on strategy
+						//	Agent::nextState = AGENT_STATE_REPLAN;
+						//
 					}
-
-				}
-				else //von if (Agent::plannedPath.empty())
-				{
-					//Agent::nextState = AGENT_STATE_REPLAN;
-					 // TODO: Check if target moved. Recalculate or so.d.
-					if (targetRoomOld && targetAgent )
+					else //von if (Agent::plannedPath.empty())
 					{
-						calculateFrame(targetRoomOld);
-						if  (!inFrame(targetAgent, targetRoomOld, fsearchFrame))
-							Agent::nextState = AGENT_STATE_REPLAN;
-					}
-				}
-
-				(void) moveAgent();
-				//if (currentState == AGENT_STATE_COMPLETE)
-				//	nextState = AGENT_STATE_COMPLETE;
-				
-			break;
-
-			case AGENT_STATE_REPLAN:
-				(void) scanAgents();
-				(void) updateDistanceList();
-				(void) plannedPath.clear();
-				(void) exclusionVector.clear();
-			
-
-				exclusionVector.push_back(this);
-				oldTarget = targetAgent;
-
-				if (targetAgent)
-					if (alreadyTouched(targetAgent))
-						exclusionVector.push_back(targetAgent);
-				
-				nextState = AGENT_STATE_SEARCH_MODE;
-
-				do
-				{
-					// Try to find a new target, which is closet to agent. Ignores Agents in exclusionVector.
-					targetAgent = getClosestTarget(exclusionVector);
-					if (targetAgent)
-					{
-						targetRoom = targetAgent->currentRoom;
-						if (planPath(targetRoom))
-						{	
-							plannedPathIterator = plannedPath.begin();
-							searchFalg = true;
+						//Agent::nextState = AGENT_STATE_REPLAN;
+						 // TODO: Check if target moved. Recalculate or so.d.
+						if (targetRoomOld && targetAgent )
+						{
+							calculateFrame(targetRoomOld);
+							if  (!inFrame(targetAgent, targetRoomOld, fsearchFrame))
+								Agent::nextState = AGENT_STATE_REPLAN;
 						}
 					}
-					else
-					{
-						// No untouched targets are not reachable. Get some distance for now.
-						targetAgent = oldTarget;
-						targetRoom = targetAgent->currentRoom;
-						searchFalg = true;
-						//nextState = AGENT_STATE_REPLAN; // This should be changed to another state to get some distance from the other agents.
-						nextState = AGENT_STATE_DISTANCE_MODE;
-					}
-						// we need to wait until any target gets reachable
-					exclusionVector.push_back(targetAgent);
 
-				} while (!searchFalg);
+					(void) moveAgent(AGENT_STATE_COLLISION);
 
-				if (Agent::notvisitedAgents.empty())
+					// Verify if search is complete.
+
+					//if (currentState == AGENT_STATE_COMPLETE)
+					//	nextState = AGENT_STATE_COMPLETE;
+				
+				break;
+
+				case AGENT_STATE_REPLAN:
+					(void) scanAgents();
+					if (Agent::notvisitedAgents.empty())
 					{
 						// No more robots left in queue.
 						Agent::nextState = AGENT_STATE_COMPLETE;
+						break;
 					}
 
-				//if (currentState == AGENT_STATE_COMPLETE)
-				//	nextState = AGENT_STATE_COMPLETE;
-			break;
+					(void) updateDistanceList();
+					(void) plannedPath.clear();
+					(void) exclusionVector.clear();
 			
-			case AGENT_STATE_COLLISION:
-				// Handle if robot detects another robot in an adjacent field.
-				// TODO: Check if adjacent robot is goal, any other robot not visited or alread visited robot.
+
+					exclusionVector.push_back(this);
+					oldTarget = targetAgent;
+
+					if (targetAgent)
+						if (alreadyTouched(targetAgent))
+							exclusionVector.push_back(targetAgent);
+				
+					nextState = AGENT_STATE_SEARCH_MODE;
+
+					do
+					{
+						// Try to find a new target, which is closet to agent. Ignores Agents in exclusionVector.
+						targetAgent = getClosestTarget(exclusionVector);
+						if (targetAgent)
+						{
+							targetRoom = targetAgent->currentRoom;
+							if (planPath(targetRoom))
+							{	
+								plannedPathIterator = plannedPath.begin();
+								searchFalg = true;
+							}
+						}
+						else
+						{
+							// No untouched targets are not reachable. Get some distance for now.
+							targetAgent = oldTarget;
+							targetRoom = targetAgent->currentRoom;
+							searchFalg = true;
+							//nextState = AGENT_STATE_REPLAN; // This should be changed to another state to get some distance from the other agents.
+							nextState = AGENT_STATE_DISTANCE_MODE;
+						}
+							// we need to wait until any target gets reachable
+						exclusionVector.push_back(targetAgent);
+
+					} while (!searchFalg);
+
+					if (Agent::notvisitedAgents.empty())
+					{
+							// No more robots left in queue.
+							Agent::nextState = AGENT_STATE_COMPLETE;
+					}
+
+					//if (currentState == AGENT_STATE_COMPLETE)
+					//	nextState = AGENT_STATE_COMPLETE;
+				break;
+			
+				case AGENT_STATE_COLLISION:
+					// Handle if robot detects another robot in an adjacent field.
+					// TODO: Check if adjacent robot is goal, any other robot not visited or alread visited robot.
+					
 					(void) scanAgents();
+					if (Agent::notvisitedAgents.empty())
+					{
+						// No more robots left in queue.
+						Agent::nextState = AGENT_STATE_COMPLETE;
+						break;
+					}
+
 					if (!(plannedPathIterator == plannedPath.end()))
 					{
 						//if ((*plannedPathIterator)->mFlagAstar)
@@ -796,37 +828,65 @@ int Agent::startAgent()
 					else
 					{
 						// if list is empty
-						if (notvisitedAgents.empty())
-						{
-							nextState = AGENT_STATE_COMPLETE;
-						}
-						else
-						{
-							nextState =	AGENT_STATE_REPLAN;
-						}
+						//if (notvisitedAgents.empty())
+						//{
+						//	nextState = AGENT_STATE_COMPLETE;
+						//}
+						//else
+						//{
+						//	nextState =	AGENT_STATE_REPLAN;
+						//}
+
+						nextState =	AGENT_STATE_REPLAN;
 					}
 
-					//if (currentState == AGENT_STATE_COMPLETE)
-					//		nextState = AGENT_STATE_COMPLETE;
-			break;
+						//if (currentState == AGENT_STATE_COMPLETE)
+						//		nextState = AGENT_STATE_COMPLETE;
+				break;
 
-			case AGENT_STATE_DISTANCE_MODE:
-				(void) scanAgents();
-				keepDistance();
-				moveAgent();
-				Agent::nextState = AGENT_STATE_SEARCH_MODE;
-			break;
+				case AGENT_STATE_DISTANCE_MODE:
+					(void) scanAgents();
+					if (Agent::notvisitedAgents.empty())
+					{
+						// No more robots left in queue.
+						Agent::nextState = AGENT_STATE_COMPLETE;
+						break;
+					}
+					keepDistance();
+					moveAgent(AGENT_STATE_COLLISION);
+					Agent::nextState = AGENT_STATE_SEARCH_MODE;
+				break;
 
+				case AGENT_STATE_COMPLETE:
+					//(void) scanAgents();
+					//keepDistance();
+					//moveAgent();
+					//// run strategy to evade other robots
+					bsearchComplete = true;
+					Agent::nextState = AGENT_STATE_COMPLETE;
+
+
+				break;
+		} // End of switch statement.
+	} // End of if statement.
+	else
+	{
+		switch(currentState)
+		{
 			case AGENT_STATE_COMPLETE:
-				//(void) scanAgents();
-				//keepDistance();
-				//moveAgent();
-				//// run strategy to evade other robots
-				Agent::nextState = AGENT_STATE_COMPLETE;
+				nextState = AGENT_STATE_COMPLETE;
+				keepDistance();
+				moveAgent(AGENT_STATE_NOP);
+				
+			break;
+
+			case	AGENT_STATE_NOP:
+				//Do nothing. Just calculate a heuristic step.
+				nextState = AGENT_STATE_COMPLETE;
 
 			break;
+		}
 	}
-
 	//if (currentState == AGENT_STATE_COMPLETE)
 	//	nextState = AGENT_STATE_COMPLETE;
 

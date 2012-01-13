@@ -132,10 +132,10 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (5)
-#define N_COLUMNS (5)
+#define N_ROWS    (8)
+#define N_COLUMNS (8)
 
-const static int static_AgentNumbers = 10;
+const static int static_AgentNumbers = 5;
 
 /*****************************************************************
  * Local Types
@@ -756,34 +756,49 @@ int main (int argc, char **argv)
 
 	vector<int> tempRes;
 	int iteratNR = 0;
-	for (int i = 0; i < 500; i++)
+	int completeCounter = 0;
+	do
 	{
-	Sleep(10);
-	system("cls"); 
+		Sleep(50);
+		system("cls");
+		// Counterreset.
+		completeCounter = 0;
+		// Calculation part.
 		for (int ag_n = 0; ag_n < static_AgentNumbers; ag_n ++)
+		{
 			tempRes.push_back  (agentList[ag_n].startAgent());
+			if (agentList[ag_n].isSearchComplete())
+				++completeCounter;
 
-	void (*dump) (Rooms &) = dumpTxt;
-	dump (rooms);
-
-	printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DISTANCE | 5 - FINAL");
-	for (unsigned int i= 0; i < agentList.size(); i++)
-	{
-		printf ("\nAgNr %d Tar: %d: Sta: %d  ",agentList[i].getID(), agentList[i].getTarget()->getID(), tempRes[i+iteratNR*(static_AgentNumbers-1)]); 
-		for (unsigned int j= 0; j < agentList[i].visitedAgentsList.size(); j++)
-		{	
-			printf ("V-%d |", agentList[i].visitedAgentsList[j]->getID());
 		}
-		for (unsigned int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
-		{	
-			printf ("n-%d |", agentList[i].notvisitedAgents[z]->getID());
-		}
-	}
-	iteratNR++;
 
-	}
+
+		// Output part
+		void (*dump) (Rooms &) = dumpTxt;
+		dump (rooms);
+
+		//printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DISTANCE | 5 - FINAL");
+		for (unsigned int i= 0; i < agentList.size(); i++)
+		{
+			//printf ("\nAgNr %d Tar: %d: Sta: %d  ",agentList[i].getID(), agentList[i].getTarget()->getID(), tempRes[i+iteratNR*(static_AgentNumbers-1)]); 
+			printf ("\nAgNr %d Tar: %d:  ",agentList[i].getID(), agentList[i].getTarget()->getID()); 
+			for (unsigned int j= 0; j < agentList[i].visitedAgentsList.size(); j++)
+			{	
+				printf ("V-%d |", agentList[i].visitedAgentsList[j]->getID());
+			}
+			for (unsigned int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
+			{	
+				printf ("n-%d |", agentList[i].notvisitedAgents[z]->getID());
+			}
+
+		}
+		//printf ("\ni-%d", i); 
+		iteratNR++;
+		if (completeCounter == static_AgentNumbers)
+			break;
+	} while(true);
 	
-
+	printf ("\nSearch is complete.");
 
   return (0);
 }

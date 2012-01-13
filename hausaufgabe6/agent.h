@@ -53,7 +53,8 @@ public:
 		AGENT_STATE_COLLISION,
 		AGENT_STATE_REPLAN,
 		AGENT_STATE_DISTANCE_MODE,
-		AGENT_STATE_COMPLETE
+		AGENT_STATE_COMPLETE,
+		AGENT_STATE_NOP
 	};
 
 public:
@@ -65,6 +66,7 @@ public:
 	nextRoom(setNextRoom), 
 	currentState(setState), 
 	mWaitCount(0),
+	bsearchComplete(false),
 	fsearchFrame(0)
 	{};
 
@@ -73,7 +75,7 @@ public:
 
 	
 	// Agent bewegen
-	void	moveAgent();
+	void	moveAgent(AgentState targetState);
 	void	scanAgents();
 	void	calculateFrame(Room* targetRoom);
 	float	getEstimateDistance (Agent* solverAgent ,Agent* targetAgent);
@@ -87,7 +89,8 @@ public:
 	void	keepDistance();
 	bool	initDistanceMap();
 	bool	inFrame(Agent* targetAgent, Room* targetRoom, float targetFrame);
-
+	
+	bool	isSearchComplete();
 	bool	planPath(Room * targetAgent);
 	bool	alreadyTouched (Agent * contactAgent);
 	bool	agentInVector (Agent * contactAgent, listAgents &searchVector); 
@@ -108,7 +111,7 @@ public:
 
 
 
-	int startAgent();
+	unsigned int startAgent();
 
 	// Geplanter Weg
 
@@ -128,6 +131,7 @@ private:
 
 	int	aID;
 	int	mWaitCount;
+	bool	bsearchComplete;
 	float	fsearchFrame;
 
 	Agent *	targetAgent;
