@@ -132,8 +132,10 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (10)
-#define N_COLUMNS (10)
+#define N_ROWS    (5)
+#define N_COLUMNS (5)
+
+const static int static_AgentNumbers = 10;
 
 /*****************************************************************
  * Local Types
@@ -155,7 +157,7 @@ static void
 getLongestPath (Rooms & rooms, Room ** beginPtr, Room ** endPtr);
 
 static void
-dumpTxt (Rooms & rooms, Room * first, Room * last, Room * third, Room * forth);
+dumpTxt (Rooms & rooms);
 
 static void
 init (int rows,
@@ -226,8 +228,9 @@ getLongestPath (Rooms & rooms, Room ** beginPtr, Room ** endPtr)
   *endPtr = rLast;
 }
 
+
 static void
-dumpTxt (Rooms & rooms, Room * first, Room * last, Room * third, Room * forth)
+dumpTxt (Rooms & rooms)
 {
   int nRows = rooms.size ();
   int nColumns = rooms[0].size ();
@@ -236,20 +239,8 @@ dumpTxt (Rooms & rooms, Room * first, Room * last, Room * third, Room * forth)
     "Rows: " + toString (nRows) + ", Columns: " + toString (nColumns);
 
   bool hasFirstAndLast = false;
+   hasFirstAndLast = true;
 
-  if (first && last)
-    {
-      s += " ";
-      hasFirstAndLast = true;
-
-      string fr = toString (first->mRow);
-      string fc = toString (first->mColumn);
-      string lr = toString (last->mRow);
-      string lc = toString (last->mColumn);
-
-      s +=
-	"Start: [" + fr + ", " + fc + "], " + "End: [" + lr + ", " + lc + "]";
-    }
 
   printf ("========================================================\n"
 	  "%s\n"
@@ -292,21 +283,6 @@ dumpTxt (Rooms & rooms, Room * first, Room * last, Room * third, Room * forth)
 	    {
 	      if (rooms[i][j]->occupiedRobot)
 			  c =  0x30 +  rooms[i][j]->occupiedRobot->getID() ;
-		 
-
-	 //     else if (rooms[i][j] == last)
-		//c = '2';
-		//  	      else if (rooms[i][j] == third)
-		//c = '3';
-		//  	      else if (rooms[i][j] == forth)
-		//c = '4';
-	//	 if ( rooms[i][j]->mFlagAstar )
-		//c= 'x';
-		//c = 0xB2;
-		//  else if (rooms[i][j]->mFlagAstar)
-		//c= 'a';
-		  
-	
 
 	    }
 
@@ -401,327 +377,6 @@ equalsIC (char *first, char *second)
     }
 
   return (true);
-}
-
-static void DFS(Room ** beginPtr, Room ** endPtr)
-{
-    //Start at the start room
-    Room *theRoom = *beginPtr;
-    Room *lastRoom = *endPtr;
-    Group history;
-	theRoom->df_search(history,lastRoom);
-        
-}
-
-static void ROBOTSEARCH(Agent* searchAgent)
-{
-	cout << "STL A* Search implementation\n(C)2001 Justin Heyes-Jones\n";
-
-	// Our sample problem defines the world as a 2d array representing a terrain
-	// Each element contains an integer from 0 to 5 which indicates the cost 
-	// of travel across the terrain. Zero means the least possible difficulty 
-	// in travelling (think ice rink if you can skate) whilst 5 represents the 
-	// most difficult. 9 indicates that we cannot pass.
-
-	// Create an instance of the search class...
-	AStarSearch<MapSearchNode> astarsearch;
-	unsigned int SearchCount = 0;
-
-	const unsigned int NumSearches = 1;
-
-	while(SearchCount < NumSearches)
-	{
-	
-		// Create a start state
-		MapSearchNode nodeStart;
-		nodeStart.room = searchAgent->currentRoom;
-
-		// Define the goal state
-		MapSearchNode nodeEnd;
-		nodeEnd.room = searchAgent->targetRoom; // TODO: Use TargetAgent instead? Or set targetRoom when selecting targetAgent
-
-		// Set Start and goal states
-		astarsearch.SetStartAndGoalStates( nodeStart, nodeEnd );
-
-		unsigned int SearchState;
-		unsigned int SearchSteps = 0;
-
-		do
-		{
-			SearchState = astarsearch.SearchStep();
-
-			SearchSteps++;
-
-	#if DEBUG_LISTS
-
-			cout << "Steps:" << SearchSteps << "\n";
-
-			int len = 0;
-
-			cout << "Open:\n";
-			MapSearchNode *p = astarsearch.GetOpenListStart();
-			while( p )
-			{
-				len++;
-	#if !DEBUG_LIST_LENGTHS_ONLY			
-				((MapSearchNode *)p)->PrintNodeInfo();
-	#endif
-				p = astarsearch.GetOpenListNext();
-				
-			}
-
-			cout << "Open list has " << len << " nodes\n";
-
-			len = 0;
-
-			cout << "Closed:\n";
-			p = astarsearch.GetClosedListStart();
-			while( p )
-			{
-				len++;
-	#if !DEBUG_LIST_LENGTHS_ONLY			
-				p->PrintNodeInfo();
-	#endif			
-				p = astarsearch.GetClosedListNext();
-			}
-
-			cout << "Closed list has " << len << " nodes\n";
-	#endif
-
-		}
-		while( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SEARCHING );
-
-		if( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SUCCEEDED )
-		{
-			cout << "Search found goal state\n";
-
-				MapSearchNode *node = astarsearch.GetSolutionStart();
-
-	#if DISPLAY_SOLUTION
-				cout << "Displaying solution\n";
-	#endif
-				int steps = 0;
-
-				node->PrintNodeInfo();
-				for( ;; )
-				{
-					node = astarsearch.GetSolutionNext();
-
-					if( !node )
-					{
-						break;
-					}
-
-					// Setzt Pfadinfo  
-					//node->PrintNodeInfo();
-
-					// Save path to agent.
-					searchAgent->plannedPath.push_back(node->getRoom());
-
-					steps ++;
-				
-				};
-
-				cout << "Solution steps " << steps << endl;
-
-				// Once you're done with the solution you can free the nodes up
-				astarsearch.FreeSolutionNodes();
-
-	
-		}
-		else if( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_FAILED ) 
-		{
-			cout << "Search terminated. Did not find goal state\n";
-		
-		}
-
-		// Display the number of loops the search went through
-		cout << "SearchSteps : " << SearchSteps << "\n";
-
-		SearchCount ++;
-
-		astarsearch.EnsureMemoryFreed();
-	}
-}
-
-static void BFS(Room ** beginPtr, Room ** endPtr)
-{
-    //Start at the start room
-	//Room::bf_search(Group & visited, Room *startRoom , Room *exitRoom)
-    Room *theRoom = *beginPtr;
-    Room *lastRoom = *endPtr;
-    Room *tempRoom = *beginPtr;
-	Group history;
-
-	tempRoom->bf_search(history, theRoom, lastRoom);
-
-}
-
-static void ASTAR(Room * beginPtr, Room * endPtr)
-{
-	cout << "STL A* Search implementation\n(C)2001 Justin Heyes-Jones\n";
-
-	// Our sample problem defines the world as a 2d array representing a terrain
-	// Each element contains an integer from 0 to 5 which indicates the cost 
-	// of travel across the terrain. Zero means the least possible difficulty 
-	// in travelling (think ice rink if you can skate) whilst 5 represents the 
-	// most difficult. 9 indicates that we cannot pass.
-
-	// Create an instance of the search class...
-	Room *firstRoom = beginPtr;
-    Room *lastRoom = endPtr;
-	AStarSearch<MapSearchNode> astarsearch;
-
-	unsigned int SearchCount = 0;
-
-	const unsigned int NumSearches = 1;
-
-	while(SearchCount < NumSearches)
-	{
-	
-		// Create a start state
-		MapSearchNode nodeStart;
-		nodeStart.room = beginPtr;
-		/*nodeStart.x = rand()%MAP_WIDTH;
-		nodeStart.y = rand()%MAP_HEIGHT; 
-		*/
-		// Define the goal state
-		MapSearchNode nodeEnd;
-		nodeEnd.room = endPtr;
-	/*	nodeEnd.x = rand()%MAP_WIDTH;
-		nodeEnd.y = rand()%MAP_HEIGHT; 
-		*/
-		// Set Start and goal states
-		
-		astarsearch.SetStartAndGoalStates( nodeStart, nodeEnd );
-
-		unsigned int SearchState;
-		unsigned int SearchSteps = 0;
-
-		do
-		{
-			SearchState = astarsearch.SearchStep();
-
-			SearchSteps++;
-
-	#if DEBUG_LISTS
-
-			cout << "Steps:" << SearchSteps << "\n";
-
-			int len = 0;
-
-			cout << "Open:\n";
-			MapSearchNode *p = astarsearch.GetOpenListStart();
-			while( p )
-			{
-				len++;
-	#if !DEBUG_LIST_LENGTHS_ONLY			
-				((MapSearchNode *)p)->PrintNodeInfo();
-	#endif
-				p = astarsearch.GetOpenListNext();
-				
-			}
-
-			cout << "Open list has " << len << " nodes\n";
-
-			len = 0;
-
-			cout << "Closed:\n";
-			p = astarsearch.GetClosedListStart();
-			while( p )
-			{
-				len++;
-	#if !DEBUG_LIST_LENGTHS_ONLY			
-				p->PrintNodeInfo();
-	#endif			
-				p = astarsearch.GetClosedListNext();
-			}
-
-			cout << "Closed list has " << len << " nodes\n";
-	#endif
-
-		}
-		while( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SEARCHING );
-
-		if( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SUCCEEDED )
-		{
-			cout << "Search found goal state\n";
-
-				MapSearchNode *node = astarsearch.GetSolutionStart();
-
-	#if DISPLAY_SOLUTION
-				cout << "Displaying solution\n";
-	#endif
-				int steps = 0;
-
-				node->PrintNodeInfo();
-				for( ;; )
-				{
-					node = astarsearch.GetSolutionNext();
-
-					if( !node )
-					{
-						break;
-					}
-
-					// Setzt Pfadinfo  
-					node->PrintNodeInfo();
-					steps ++;
-				
-				};
-
-				cout << "Solution steps " << steps << endl;
-
-				// Once you're done with the solution you can free the nodes up
-				astarsearch.FreeSolutionNodes();
-
-	
-		}
-		else if( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_FAILED ) 
-		{
-			cout << "Search terminated. Did not find goal state\n";
-		
-		}
-
-		// Display the number of loops the search went through
-		cout << "SearchSteps : " << SearchSteps << "\n";
-
-		SearchCount ++;
-
-		astarsearch.EnsureMemoryFreed();
-	}
-}
-
-
-
-static void IDDS(Room **beginPtr, Room ** endPtr)
-{
-	int depth = 0;
-	bool result = false;
-	Room *theRoom = *beginPtr;
-    Room *lastRoom = *endPtr;
-    Room *tempRoom = *beginPtr;
-	Group history;
-
-	tempRoom->setParent(NULL);
-
-	
-	while (lastRoom->getIdsFlag() == false)
-	{
-			result = tempRoom->id_search(history, lastRoom, depth);
-			depth +=1;
-			history.clear();
-	}
-
-	if (lastRoom->mFlagIDS == true)
-	{
-		tempRoom = lastRoom;
-		while (!tempRoom->getParent() == NULL)
-		{
-			tempRoom->mFlagIDS = true;
-			tempRoom = tempRoom->getParent();
-		}
-	}
 }
 
 
@@ -989,7 +644,7 @@ int main (int argc, char **argv)
 	  printf ("(%d / %d)\n", i + 1, nWalls);
 	  printf ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
-	  dumpTxt (rooms, NULL, NULL, NULL, NULL);
+	  dumpTxt (rooms);
 	}
 
       Room *first = walls[i]->getFirst ();
@@ -1092,56 +747,32 @@ int main (int argc, char **argv)
 	printf ("Torn down walls: %d ", tornWalls+(nWalls-leftWalls));
 #endif
 
-  Room *rFirst = NULL;
-  Room *rLast = NULL;
-  Room *rThird = NULL;
-  Room *rForth = NULL;
-  Room *rTemp = NULL;
-
-  initAgents(4, agentList, rooms);
-  //getLongestPath (rooms, &rFirst, &rLast);
-  rFirst = agentList[0].getCurrent();
-  rLast = agentList[1].getCurrent();
-   rThird = agentList[2].getCurrent();
-  rForth = agentList[3].getCurrent();
 
 
-//	agentList[0].targetRoom = agentList[1].currentRoom;
-	agentList[0].setTarget(&agentList[1]);
-	agentList[1].setTarget(&agentList[0]);
-	agentList[2].setTarget(&agentList[3]);
-	agentList[3].setTarget(&agentList[2]);
-//	ROBOTSEARCH(&agentList[0]);
-//	agentList[0].planPath(agentList[0].targetRoom);
-	//agentList[1].targetRoom = agentList[0].currentRoom;
-//	ROBOTSEARCH(&agentList[1]);
-	//agentList[2].targetRoom = agentList[3].currentRoom;
-//	ROBOTSEARCH(&agentList[2]);
-	//agentList[3].targetRoom = agentList[2].currentRoom;
-//	ROBOTSEARCH(&agentList[3]);
-	//agentList[0].plannedPathIterator
+  initAgents(static_AgentNumbers, agentList, rooms);
 
-	//vector <Agent::AgentState> tempStates;
+
+
+
 	vector<int> tempRes;
 	int iteratNR = 0;
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 500; i++)
 	{
-	Sleep(600);
+	Sleep(10);
 	system("cls"); 
-	tempRes.push_back  (agentList[0].startAgent());
-	tempRes.push_back (agentList[1].startAgent());
-	tempRes.push_back (agentList[2].startAgent());
-	tempRes.push_back  (agentList[3].startAgent());
-	void (*dump) (Rooms &, Room *, Room *, Room *, Room *) = dumpTxt;
-	dump (rooms, rFirst, rLast, rThird, rForth);
+		for (int ag_n = 0; ag_n < static_AgentNumbers; ag_n ++)
+			tempRes.push_back  (agentList[ag_n].startAgent());
 
-	printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DONE");
+	void (*dump) (Rooms &) = dumpTxt;
+	dump (rooms);
+
+	printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DISTANCE | 5 - FINAL");
 	for (unsigned int i= 0; i < agentList.size(); i++)
 	{
-		printf ("\nAgent Nr %d Target: %d: State: %d  ",agentList[i].getID(), agentList[i].getTarget()->getID(), tempRes[i+iteratNR*3]); 
+		printf ("\nAgNr %d Tar: %d: Sta: %d  ",agentList[i].getID(), agentList[i].getTarget()->getID(), tempRes[i+iteratNR*(static_AgentNumbers-1)]); 
 		for (unsigned int j= 0; j < agentList[i].visitedAgentsList.size(); j++)
 		{	
-			printf ("v-%d |", agentList[i].visitedAgentsList[j]->getID());
+			printf ("V-%d |", agentList[i].visitedAgentsList[j]->getID());
 		}
 		for (unsigned int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
 		{	

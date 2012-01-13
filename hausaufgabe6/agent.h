@@ -52,6 +52,7 @@ public:
 		AGENT_STATE_SEARCH_MODE,
 		AGENT_STATE_COLLISION,
 		AGENT_STATE_REPLAN,
+		AGENT_STATE_DISTANCE_MODE,
 		AGENT_STATE_COMPLETE
 	};
 
@@ -63,7 +64,8 @@ public:
 	currentRoom (setRoom), 
 	nextRoom(setNextRoom), 
 	currentState(setState), 
-	mWaitCount(0)
+	mWaitCount(0),
+	fsearchFrame(0)
 	{};
 
 	// get ID
@@ -73,7 +75,7 @@ public:
 	// Agent bewegen
 	void	moveAgent();
 	void	scanAgents();
-
+	void	calculateFrame(Room* targetRoom);
 	float	getEstimateDistance (Agent* solverAgent ,Agent* targetAgent);
 	void	setID(int setID) {aID = setID;};
 	void	pushToNotVisitedList (Agent* setTarget);
@@ -84,6 +86,7 @@ public:
 	void	updateDistanceList();
 	void	keepDistance();
 	bool	initDistanceMap();
+	bool	inFrame(Agent* targetAgent, Room* targetRoom, float targetFrame);
 
 	bool	planPath(Room * targetAgent);
 	bool	alreadyTouched (Agent * contactAgent);
@@ -98,6 +101,7 @@ public:
 	// Pointer auf aktuellen Raum
 	Room*	currentRoom;
 	Room*	targetRoom;
+	Room*	targetRoomOld;
 	// Pointer auf nächsten Raum
 	Room*	nextRoom;
 	// set Room
@@ -124,6 +128,7 @@ private:
 
 	int	aID;
 	int	mWaitCount;
+	float	fsearchFrame;
 
 	Agent *	targetAgent;
 
