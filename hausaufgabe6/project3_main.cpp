@@ -100,6 +100,7 @@
 #define THEWIDTH 1
 #define DEBUG_LISTS 0
 #define DEBUG	1
+#define DISPLAY	1
 /*****************************************************************
  * C/C++ Headers
  *****************************************************************/
@@ -132,10 +133,10 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (8)
-#define N_COLUMNS (8)
+#define N_ROWS    (25)
+#define N_COLUMNS (25)
 
-const static int static_AgentNumbers = 5;
+const static int static_AgentNumbers = 20;
 
 /*****************************************************************
  * Local Types
@@ -759,7 +760,7 @@ int main (int argc, char **argv)
 	int completeCounter = 0;
 	do
 	{
-		Sleep(50);
+		Sleep(10);
 		system("cls");
 		// Counterreset.
 		completeCounter = 0;
@@ -772,12 +773,13 @@ int main (int argc, char **argv)
 
 		}
 
-
+		#if DISPLAY
 		// Output part
 		void (*dump) (Rooms &) = dumpTxt;
 		dump (rooms);
 
 		//printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DISTANCE | 5 - FINAL");
+		if (static_AgentNumbers < 10)
 		for (unsigned int i= 0; i < agentList.size(); i++)
 		{
 			//printf ("\nAgNr %d Tar: %d: Sta: %d  ",agentList[i].getID(), agentList[i].getTarget()->getID(), tempRes[i+iteratNR*(static_AgentNumbers-1)]); 
@@ -792,10 +794,16 @@ int main (int argc, char **argv)
 			}
 
 		}
-		//printf ("\ni-%d", i); 
+		#endif
+
+		#if !DISPLAY
+			printf ("\n %d out of %d completed.", completeCounter, static_AgentNumbers);
+		#endif
+		
 		iteratNR++;
 		if (completeCounter == static_AgentNumbers)
 			break;
+
 	} while(true);
 	
 	printf ("\nSearch is complete.");

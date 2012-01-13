@@ -14,7 +14,7 @@
 #ifndef _INCL_AGENT
 #define _INCL_AGENT
 
-#define AGENT_MAXWAIT 1
+#define AGENT_MAXWAIT 4
 #define	AGENT_MAXSEARCH 100
 // stl includes
 #include <algorithm>
