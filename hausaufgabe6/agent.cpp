@@ -136,8 +136,10 @@ void Agent::keepDistance()
 		hxRoom.insert(hxRoomInsert);
 	}
 
+	// Get last element. Due to the weak ordering it is the node with the greatest distance to all other agents.
 	hxRoomIterator = hxRoom.end();
 	hxRoomIterator --;
+
 
 	plannedPath.push_back(hxRoomIterator->second);
 	plannedPathIterator = plannedPath.begin();
@@ -425,12 +427,7 @@ void Agent::scanAgents()
 					notvisitedAgents.erase(tempIt);
 				}
 
-				//if (currentRoom->mEast->occupiedRobot == targetAgent)
-				//{
-				//	// Erase the current target. We foudn it.
-				//	targetAgent = NULL;
-				//	targetRoom = this->currentRoom;
-				//}
+
 			
 			}
 		}
@@ -451,12 +448,7 @@ void Agent::scanAgents()
 					notvisitedAgents.erase(tempIt);
 				}
 
-				//if (currentRoom->mNorth->occupiedRobot == targetAgent)
-				//{
-				//	// Erase the current target. We foudn it.
-				//	targetAgent = NULL;
-				//	targetRoom = this->currentRoom;
-				//}
+
 			}
 		}
 	}
@@ -476,12 +468,7 @@ void Agent::scanAgents()
 					notvisitedAgents.erase(tempIt);
 				}
 				
-				//if (currentRoom->mSouth->occupiedRobot == targetAgent)
-				//{
-				//	// Erase the current target. We foudn it.
-				//	targetAgent = NULL;
-				//	targetRoom = this->currentRoom;
-				//}
+
 			}
 		}
 	}
@@ -501,12 +488,7 @@ void Agent::scanAgents()
 					notvisitedAgents.erase(tempIt);
 				}
 
-				//if (currentRoom->mWest->occupiedRobot == targetAgent)
-				//{
-				//	// Erase the current target. We foudn it.
-				//	targetAgent = NULL;
-				//	targetRoom = this->currentRoom;
-				//}
+
 			}
 		}
 	}
@@ -536,11 +518,7 @@ void Agent::moveAgent(AgentState targetState)
 			plannedPathIterator++;
 		}
 	}
-	//else
-	//{
-	//	if (currentState != AGENT_STATE_COMPLETE)				
-	//		nextState = AGENT_STATE_REPLAN;
-	//}
+
 }
 
 float	Agent::getEstimateDistance (Agent* solverAgent ,Agent* targetAgent)
@@ -696,18 +674,7 @@ unsigned int Agent::startAgent()
 					if (Agent::plannedPathIterator == plannedPath.end())
 					{
 						Agent::nextState = AGENT_STATE_REPLAN;
-						//// TODO: Check if some robots still in not visited Queue.
-						//if (Agent::notvisitedAgents.empty())
-						//{
-						//	// No more robots left in queue.
-						//	Agent::nextState = AGENT_STATE_COMPLETE;
-						//}
-						//else
-						//{
-						//	// TODO´: define new target
-						//	//		  depends on strategy
-						//	Agent::nextState = AGENT_STATE_REPLAN;
-						//
+
 					}
 					else //von if (Agent::plannedPath.empty())
 					{
@@ -725,8 +692,6 @@ unsigned int Agent::startAgent()
 
 					// Verify if search is complete.
 
-					//if (currentState == AGENT_STATE_COMPLETE)
-					//	nextState = AGENT_STATE_COMPLETE;
 				
 				break;
 
@@ -827,15 +792,6 @@ unsigned int Agent::startAgent()
 					}
 					else
 					{
-						// if list is empty
-						//if (notvisitedAgents.empty())
-						//{
-						//	nextState = AGENT_STATE_COMPLETE;
-						//}
-						//else
-						//{
-						//	nextState =	AGENT_STATE_REPLAN;
-						//}
 
 						nextState =	AGENT_STATE_REPLAN;
 					}
@@ -846,22 +802,30 @@ unsigned int Agent::startAgent()
 
 				case AGENT_STATE_DISTANCE_MODE:
 					(void) scanAgents();
+					
 					if (Agent::notvisitedAgents.empty())
 					{
 						// No more robots left in queue.
 						Agent::nextState = AGENT_STATE_COMPLETE;
 						break;
 					}
+					
+					if (mDistanceCount++ >= AGENT_MAXWAIT)
+					{
+						mDistanceCount = 0;
+						nextState = AGENT_STATE_SEARCH_MODE;
+					}
+					else
+						nextState = AGENT_STATE_DISTANCE_MODE;
+					
 					keepDistance();
-					moveAgent(AGENT_STATE_COLLISION);
-					Agent::nextState = AGENT_STATE_SEARCH_MODE;
+					moveAgent(AGENT_STATE_DISTANCE_MODE);
+					
 				break;
 
 				case AGENT_STATE_COMPLETE:
-					//(void) scanAgents();
-					//keepDistance();
-					//moveAgent();
-					//// run strategy to evade other robots
+
+					// Change Strategy. Also change Statemachine. ( This is done by the if(bsearchComplete) statement)
 					bsearchComplete = true;
 					Agent::nextState = AGENT_STATE_COMPLETE;
 
@@ -871,6 +835,7 @@ unsigned int Agent::startAgent()
 	} // End of if statement.
 	else
 	{
+		// Statemachine for the final strategy.
 		switch(currentState)
 		{
 			case AGENT_STATE_COMPLETE:
