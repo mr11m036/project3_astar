@@ -1,15 +1,23 @@
 /**********************************************************************\
-* Dateiname: agent.cpp
+* Dateiname: maze.cpp
 * Autor : Mario Grotschar
-* Projekt : project3_astar
+*		  Gerardo Martinez
+*		  Christoph Eder 
+*
+* Projekt : Projekt 3 Die Besucher
 * Copyright (C) <<COPYRIGHT>>
 *
+* Kurzbeschreibung: Beinhaltet die Funktionen zum Erzeugen und Traversieren
+*					eines Labyrinth.
 *
 * Datum: Autor: Grund der Aenderung:
 * 7.12.2011 Mario Grotschar Neuerstellung
 * <<DATUM>> <<AUTOR>> <<AENDERUNGSGRUND>>
 *
 \**********************************************************************/
+
+/*--- #includes der Form <...> ---------------------------------------*/
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -23,6 +31,7 @@
 #include <iostream>
 #include <math.h>
 
+/*--- #includes der Form "..." ---------------------------------------*/
 #include "maze.h"
 
 

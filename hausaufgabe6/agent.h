@@ -1,9 +1,13 @@
 /**********************************************************************\
 * Dateiname: agent.h
 * Autor : Mario Grotschar
-* Projekt : project3_astar
+*		  Gerardo Martinez
+*		  Christoph Eder 
+*
+* Projekt : Projekt 3 Die Besucher
 * Copyright (C) <<COPYRIGHT>>
 *
+* Kurzbeschreibung: Headerfile fuer agent.cpp
 *
 * Datum: Autor: Grund der Aenderung:
 * 7.12.2011 Mario Grotschar Neuerstellung
@@ -14,25 +18,29 @@
 #ifndef _INCL_AGENT
 #define _INCL_AGENT
 
-#define AGENT_MAXWAIT 4
-#define	AGENT_MAXSEARCH 100
-// stl includes
+
+
+/*--- #includes der Form <...> ---------------------------------------*/
 #include <algorithm>
 #include <set>
 #include <vector>
 #include <list>
 
+/*--- #includes der Form "..." ---------------------------------------*/
 #include "maze.h"
 #include "planner.h"
 
+/*--- #define-Konstanten und Makros ----------------------------------*/
+#define AGENT_MAXWAIT 4
+#define	AGENT_MAXSEARCH 100
+
+/*--- Datentypen (typedef) -------------------------------------------*/
 typedef list <Room *> listPath;
 typedef listPath::iterator listPathIterator;
 typedef vector	<Agent *>	visitedAgents;
 typedef visitedAgents::iterator visitedAgentsIterator;
-
 typedef vector	<Agent *>	listAgents;
 typedef visitedAgents::iterator listAgentsIterator;
-
 typedef	map <Agent *, float> mapDistance;
 typedef	mapDistance::iterator mapDistanceIterator;
 typedef	pair<mapDistanceIterator, bool> mapDistanceReturnPair;
@@ -73,13 +81,13 @@ public:
 
 	// get ID
 	int	getID() { return aID;}
-
+	unsigned int startAgent();
+	float	getEstimateDistance (Agent* solverAgent ,Agent* targetAgent);
 	
 	// Agent bewegen
 	void	moveAgent(AgentState targetState);
 	void	scanAgents();
 	void	calculateFrame(Room* targetRoom);
-	float	getEstimateDistance (Agent* solverAgent ,Agent* targetAgent);
 	void	setID(int setID) {aID = setID;};
 	void	pushToNotVisitedList (Agent* setTarget);
 	void	setTarget(Agent* setTarget); 
@@ -88,13 +96,14 @@ public:
 	void	setnotvisitedAgents(vector <Agent *> setnotvisited);
 	void	updateDistanceList();
 	void	keepDistance();
+
 	bool	initDistanceMap();
 	bool	inFrame(Agent* targetAgent, Room* targetRoom, float targetFrame);
-	
 	bool	isSearchComplete();
 	bool	planPath(Room * targetAgent);
 	bool	alreadyTouched (Agent * contactAgent);
 	bool	agentInVector (Agent * contactAgent, listAgents &searchVector); 
+
 	Agent*	getClosestTarget(listAgents &oldTarget);
 	Agent*	getClosestTarget(Agent* oldTarget);
 	Agent*	getTarget(); 
@@ -110,19 +119,13 @@ public:
 	Room*	nextRoom;
 	// set Room
 
-
-
-	unsigned int startAgent();
-
 	// Geplanter Weg
-
 	listPath	plannedPath;
 	listPathIterator plannedPathIterator;	
 	
 	// Vektor noch nicht besuchte Agenten
 	visitedAgents	notvisitedAgents;
 	visitedAgents	visitedAgentsList;
-
 	visitedAgentsIterator findVisitedAgent (Agent * contactAgent);
 
 	AgentState publicState;
@@ -137,7 +140,6 @@ private:
 	float	fsearchFrame;
 
 	Agent *	targetAgent;
-
 	AgentState currentState;
 	AgentState nextState;
 	

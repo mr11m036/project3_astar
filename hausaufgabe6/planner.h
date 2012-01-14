@@ -1,9 +1,12 @@
 /**********************************************************************\
 * Dateiname: planner.h
 * Autor : Mario Grotschar
-* Projekt : project3_astar
+*		  Gerardo Martinez
+*		  Christoph Eder 
+* Projekt : Projekt 3 Die Besucher
 * Copyright (C) <<COPYRIGHT>>
 *
+* Kurzbeschreibung: Headerfile fuer planner.cpp
 *
 * Datum: Autor: Grund der Aenderung:
 * 8.12.2011 Mario Grotschar Neuerstellung
@@ -15,12 +18,15 @@
 #ifndef _INCL_PLANNER
 #define _INCL_PLANNER
 
+/*--- #includes der Form <...> ---------------------------------------*/
 #include <iostream>
 
+/*--- #includes der Form "..." ---------------------------------------*/
 #include "maze.h"
 #include "agent.h"
 #include "stlastar.h"
-// Definitions
+
+/*--- #define-Konstanten und Makros ----------------------------------*/
 
 
 

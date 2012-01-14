@@ -1,15 +1,23 @@
 /**********************************************************************\
 * Dateiname: agent.cpp
 * Autor : Mario Grotschar
-* Projekt : project3_astar
+		  Gerardo Martinez
+		  Christoph Eder 
+* Projekt : Projekt 3 Die Besucher
 * Copyright (C) <<COPYRIGHT>>
 *
+* Kurzbeschreibung: Beinhaltet die Logik des Agenten in Form einer
+*					Statemachine. Enthält auch die funktion startAgent() 
+*					die im Main ausgeführt wird.
 *
 * Datum: Autor: Grund der Aenderung:
 * 7.12.2011 Mario Grotschar Neuerstellung
 * <<DATUM>> <<AUTOR>> <<AENDERUNGSGRUND>>
 *
 \**********************************************************************/
+
+/*--- #includes der Form <...> ---------------------------------------*/
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -20,22 +28,35 @@
 #include <set>
 #include <map>
 #include <queue>
-
 #include <iostream>
 #include <math.h>
+
+/*--- #includes der Form "..." ---------------------------------------*/
 
 #include "stlastar.h"
 #include "agent.h"
 
+/*--- #define-Konstanten und Makros ----------------------------------*/
 #define	AGENT_INIT_ERROR	10
 #define	AGENT_ESTIMATE_ERROR	20
 
 using namespace std;
 
+
+
 bool operator==(const Agent& x, const Agent& y)
 {
 	return (x.aID == y.aID);
 }
+
+
+/**********************************************************************\
+* Funktionsname: inFrame
+*
+* Kurzbeschreibung: Diese Funktion ueberpruef, ob sich das Ziel noch 
+* innerhalb eines gewissen Frames von der Ursprungsposition befindet.
+*
+\**********************************************************************/
 
 bool	Agent::inFrame(Agent* targetAgent, Room* targetRoom, float targetFrame)
 {
@@ -48,6 +69,16 @@ bool	Agent::inFrame(Agent* targetAgent, Room* targetRoom, float targetFrame)
 		return false;
 }
 
+/**********************************************************************\
+* Funktionsname: calculateFrame
+*
+* Kurzbeschreibung: Diese Funktion berechnet den Frame. Er ist direkt 
+* proportional zur Entfernung des Ziels. Je weiter desto weniger Gewicht
+* haben Fehler. Je naeher ich dme Ziel bin, umso gneauer muss geplant
+* werden.
+*
+\**********************************************************************/
+
 void	Agent::calculateFrame(Room* targetRoom)
 {
 	Agent dummyAgent;
@@ -55,6 +86,15 @@ void	Agent::calculateFrame(Room* targetRoom)
 	fsearchFrame = getEstimateDistance(this, &dummyAgent);
 	fsearchFrame /= 2;
 }
+
+/**********************************************************************\
+* Funktionsname: keepDistance
+*
+* Kurzbeschreibung: Gewichtet alle adjazenten Räume mit der Summe der Distanzen
+* zu allen anderen Agenten. Als Ziel wird der Raum mit der groeßten Summe
+* gewaehlt. Die Idee ist es eine maximale Distanz zu allen Agenten zu halten.
+*
+\**********************************************************************/
 
 void Agent::keepDistance()
 {
@@ -139,12 +179,20 @@ void Agent::keepDistance()
 	// Get last element. Due to the weak ordering it is the node with the greatest distance to all other agents.
 	hxRoomIterator = hxRoom.end();
 	hxRoomIterator --;
-
+	/*hxRoomIterator = hxRoom.begin();*/
 
 	plannedPath.push_back(hxRoomIterator->second);
 	plannedPathIterator = plannedPath.begin();
 	// Endof Robot check for visted agents
 }
+
+/**********************************************************************\
+* Funktionsname: getClosestTarget
+*
+* Kurzbeschreibung: Findet den naehersten Agenten, welcher nicht 
+* mit oldTarget uebereinstimmt.
+*
+\**********************************************************************/
 
 Agent*	Agent::getClosestTarget(Agent* oldTarget)
 {
@@ -175,6 +223,13 @@ Agent*	Agent::getClosestTarget(Agent* oldTarget)
  
 }
 
+/**********************************************************************\
+* Funktionsname: getClosestTarget
+*
+* Kurzbeschreibung: Findet den naehersten Agenten, welcher nicht 
+* in der Liste oldTarget ist. Ueberladung zur vorhergegangen funktion.
+*
+\**********************************************************************/
 Agent*	Agent::getClosestTarget(listAgents &oldTarget)
 {
 	float tempValue = AGENT_MAXSEARCH;
@@ -204,11 +259,23 @@ Agent*	Agent::getClosestTarget(listAgents &oldTarget)
  
 }
 
+/**********************************************************************\
+* Funktionsname: getTarget
+*
+* Kurzbeschreibung: getter Methode fuer das aktuelle Ziel.
+*
+\**********************************************************************/
 Agent* Agent::getTarget()
 {
 	return targetAgent;
 }
 
+/**********************************************************************\
+* Funktionsname: agentInVector
+*
+* Kurzbeschreibung: Untersucht ob ein Agent in der uebergebenen Liste ist.
+*
+\**********************************************************************/
 bool	Agent::agentInVector (Agent * contactAgent, listAgents &searchVector)
 {
 	listAgentsIterator resultIterator;
@@ -226,8 +293,14 @@ bool	Agent::agentInVector (Agent * contactAgent, listAgents &searchVector)
 	{
 		return (false);
 	}
-}	
-	
+}
+
+/**********************************************************************\
+* Funktionsname: alreadyTouched
+*
+* Kurzbeschreibung: Untersucht ob ein Agent bereits abgefahren wurde.
+*
+\**********************************************************************/
 	bool Agent::alreadyTouched (Agent * contactAgent)
 {
 	// search in visited list if robot was already touched.
@@ -250,7 +323,13 @@ bool	Agent::agentInVector (Agent * contactAgent, listAgents &searchVector)
 	}
 }
 
-// TODO Delete Function erstellen mit Parameter Agent und Vector
+
+/**********************************************************************\
+* Funktionsname: findVisitedAgent
+*
+* Kurzbeschreibung: Sucht nach Agenten in notvisitedAgents List.
+*
+\**********************************************************************/
 visitedAgentsIterator Agent::findVisitedAgent (Agent * contactAgent)
 {
 	// search in visited list if robot was already touched.
@@ -263,7 +342,12 @@ visitedAgentsIterator Agent::findVisitedAgent (Agent * contactAgent)
 	return (resultIterator);
 }
 
-
+/**********************************************************************\
+* Funktionsname: planPath
+*
+* Kurzbeschreibung: Plant den Weg zum Ziel mittels A-Star.
+*
+\**********************************************************************/
 
 bool Agent::planPath(Room* targetAgent)
 {
@@ -393,21 +477,48 @@ bool Agent::planPath(Room* targetAgent)
 	return (searchResult);
 }
 
+/**********************************************************************\
+* Funktionsname: setNext
+*
+* Kurzbeschreibung: Trivial.
+*
+\**********************************************************************/
 void Agent::setNext(Room* setRoom)
 {
 	nextRoom = setRoom;
 }
 
+
+/**********************************************************************\
+* Funktionsname: pushToNotVisitedList
+*
+* Kurzbeschreibung: Trivial.
+*
+\**********************************************************************/
 void Agent::pushToNotVisitedList(Agent* setTarget)
 {
 	notvisitedAgents.push_back(setTarget);
 }
 
+
+/**********************************************************************\
+* Funktionsname: setTarget
+*
+* Kurzbeschreibung: Trivial.
+*
+\**********************************************************************/
 void Agent::setTarget(Agent* setTarget)
 {
 	targetAgent = setTarget;
 }
 
+/**********************************************************************\
+* Funktionsname: scanAgents
+*
+* Kurzbeschreibung: Ueberpruft alle adajzenten Raeume auf Agenten die 
+* noch nicht abgefahren wurden.
+*
+\**********************************************************************/
 void Agent::scanAgents()
 {
 	visitedAgentsIterator tempIt;
@@ -495,6 +606,14 @@ void Agent::scanAgents()
 	// Endof Robot check for visted agents
 }
 
+/**********************************************************************\
+* Funktionsname: moveAgent
+*
+* Kurzbeschreibung: Bewegt den Agenten in den vom Planungsalgorithmus 
+* berechneten naechsten Raum. Im Falle einer Kollision wird der State
+* entsprechend gesetzt (targetState).
+*
+\**********************************************************************/
 void Agent::moveAgent(AgentState targetState)
 {
 	// Room is free.
@@ -521,6 +640,13 @@ void Agent::moveAgent(AgentState targetState)
 
 }
 
+/**********************************************************************\
+* Funktionsname: getEstimateDistance
+*
+* Kurzbeschreibung: Berechnet die Manhattendistanz vom solverAgent zum
+* targetAgent.
+*
+\**********************************************************************/
 float	Agent::getEstimateDistance (Agent* solverAgent ,Agent* targetAgent)
 {
 	float returnvalue = -1;
@@ -541,6 +667,13 @@ float	Agent::getEstimateDistance (Agent* solverAgent ,Agent* targetAgent)
 	return returnvalue;
 }
 
+/**********************************************************************\
+* Funktionsname: updateDistanceList
+*
+* Kurzbeschreibung: Berechnet die Manhattendistanzen zu allen anderen
+* Agenten.
+*
+\**********************************************************************/
 void	Agent::updateDistanceList()
 {
 	mapDistanceIterator mapIt;
@@ -555,6 +688,13 @@ void	Agent::updateDistanceList()
 
 }
 
+/**********************************************************************\
+* Funktionsname: initDistanceMap
+*
+* Kurzbeschreibung: Initialsiert die Manhattendistanzen zu allen anderen
+* Agenten.
+*
+\**********************************************************************/
 bool	Agent::initDistanceMap()
 {
 	bool returnval = false;
@@ -582,16 +722,39 @@ bool	Agent::initDistanceMap()
 	return returnval;
 }
 
+/**********************************************************************\
+* Funktionsname: setnotvisitedAgents
+*
+* Kurzbeschreibung: Trivial
+*
+\**********************************************************************/
 void	Agent::setnotvisitedAgents(vector <Agent *> setnotvisited)
 {
 	notvisitedAgents = setnotvisited;
 }
 
+/**********************************************************************\
+* Funktionsname: isSearchComplete
+*
+* Kurzbeschreibung: Trivial 
+*
+\**********************************************************************/
 bool	Agent::isSearchComplete()
 {
 	return bsearchComplete;
 }
 
+/**********************************************************************\
+* Funktionsname: startAgent
+*
+* Kurzbeschreibung: Ist die Hauptfunktion von agent.cpp. Diese wird auch
+* in der Mainfunktion aufgerufen, um den naechsten Schritt des Agenten
+* auszufuehren. Kern der Funktion sind zwei Statemachines, die die verschiedenen
+* Strategien widerspiegeln. Die erste Statemachine hat die Funktion das Ver-
+* halten waehrend der suche zu steuern. Die Zweite wird verwendet, wenn die 
+* Suche beendet wurde.
+*
+\**********************************************************************/
 unsigned int Agent::startAgent()
 {
 	// Agent State machine

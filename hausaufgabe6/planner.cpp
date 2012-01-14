@@ -1,15 +1,24 @@
 /**********************************************************************\
 * Dateiname: planner.cpp
 * Autor : Mario Grotschar
-* Projekt : project3_astar
+*		  Gerardo Martinez
+*		  Christoph Eder 
+*
+* Projekt : Projekt 3 Die Besucher
 * Copyright (C) <<COPYRIGHT>>
 *
+* Kurzbeschreibung: Beinhaltet Funktionen um den Generischen A-Staralgorithmus
+*					mit der spezifischen Mazeimplementierung kompatibel zu machen.
+*					Reiner Gluecode.
 *
 * Datum: Autor: Grund der Aenderung:
 * 7.12.2011 Mario Grotschar Neuerstellung
 * <<DATUM>> <<AUTOR>> <<AENDERUNGSGRUND>>
 *
 \**********************************************************************/
+
+/*--- #includes der Form <...> ---------------------------------------*/
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -23,6 +32,8 @@
 #include <iostream>
 #include <math.h>
 
+/*--- #includes der Form "..." ---------------------------------------*/
+
 #include "stlastar.h"
 #include "agent.h"
 
@@ -32,8 +43,6 @@ using namespace std;
 // --------------
 // NodeSearch Astar
 // --------------
-
-
 
 bool MapSearchNode::IsSameState( MapSearchNode &rhs )
 {

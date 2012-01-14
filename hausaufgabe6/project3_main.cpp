@@ -1,13 +1,18 @@
 /**********************************************************************\
 * Dateiname: maze_mario_grotschar.cpp
 * Autor : Mario Grotschar
-* Projekt : hausaufgabe5
+*		  Gerardo Martinez
+*		  Christoph Eder 
+*
+* Projekt : Projekt 3 Die Besucher
 * Copyright (C) <<COPYRIGHT>>
 *
+** Kurzbeschreibung: Beinhaltet die Mainfunktion, sowie Funktionen zum
+*					 Erzeugen und Ausduennen des Maze sowie
+*					zur Zeitmessung des Projekts.
 *
 * Datum: Autor: Grund der Aenderung:
-* 4.11.2011 Mario Grotschar Neuerstellung
-* 5.11.2011 IDDS hinzugefügt.
+*
 * <<DATUM>> <<AUTOR>> <<AENDERUNGSGRUND>>
 *
 \**********************************************************************/
@@ -133,8 +138,8 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (25)
-#define N_COLUMNS (25)
+#define N_ROWS    (15)
+#define N_COLUMNS (20)
 
 const static int static_AgentNumbers = 20;
 
@@ -537,6 +542,7 @@ int main (int argc, char **argv)
   int tornWalls = 0;
   bool help = false;
   string errMsg = "";
+  clock_t begin_search ,end_search;
 
 //  clock_t begin_bfs ,end_bfs, begin_dfs, end_dfs, begin_ids, end_ids, begin_astar, end_astar;
   
@@ -758,9 +764,14 @@ int main (int argc, char **argv)
 	vector<int> tempRes;
 	int iteratNR = 0;
 	int completeCounter = 0;
+	    begin_search = clock();
+
+  
 	do
 	{
+		#if DISPLAY
 		Sleep(10);
+		#endif
 		system("cls");
 		// Counterreset.
 		completeCounter = 0;
@@ -805,8 +816,9 @@ int main (int argc, char **argv)
 			break;
 
 	} while(true);
+	end_search = clock();
 	
-	printf ("\nSearch is complete.");
+	printf ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
 
   return (0);
 }

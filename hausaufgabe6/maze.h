@@ -1,4 +1,18 @@
-// maze.h
+/**********************************************************************\
+* Dateiname: maze.h
+* Autor : Mario Grotschar
+*		  Gerardo Martinez
+*		  Christoph Eder 
+* Projekt : Projekt 3 Die Besucher
+* Copyright (C) <<COPYRIGHT>>
+*
+* Kurzbeschreibung: headerfile fuer maze.cpp
+*
+* Datum: Autor: Grund der Aenderung:
+* 7.12.2011 Mario Grotschar Neuerstellung
+* <<DATUM>> <<AUTOR>> <<AENDERUNGSGRUND>>
+*
+\**********************************************************************/
 #ifndef _INCL_MAZE
 #define _INCL_MAZE
 #include <iostream>
@@ -7,7 +21,9 @@
 /*****************************************************************
  * Local Types
  *****************************************************************/
+/*--- #define-Konstanten und Makros ----------------------------------*/
 
+/*--- Datentypen (typedef) -------------------------------------------*/
 typedef std::set < int >  Group;
 typedef std::map < int,  Group >  GroupIdToGroup;
 
