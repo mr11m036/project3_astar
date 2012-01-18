@@ -40,6 +40,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>\pdc34dllw;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -55,6 +56,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>pdc34dllw/pdcurses.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -84,6 +86,8 @@
     <ClInclude Include="agent.h" />
     <ClInclude Include="fsa.h" />
     <ClInclude Include="maze.h" />
+    <ClInclude Include="pdc34dllw\curses.h" />
+    <ClInclude Include="pdc34dllw\panel.h" />
     <ClInclude Include="planner.h" />
     <ClInclude Include="stlastar.h" />
   </ItemGroup>

@@ -124,7 +124,7 @@
 #include <math.h>
 #include <windows.h> 
 
-
+#include "pdc34dllw/curses.h"
 #include "stlastar.h" // See header for copyright and usage information
 #include "maze.h"
 //#include "planner.h" Already included in agent.
@@ -138,10 +138,10 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (15)
-#define N_COLUMNS (20)
+#define N_ROWS    (10)
+#define N_COLUMNS (25)
 
-const static int static_AgentNumbers = 20;
+const static int static_AgentNumbers = 10;
 
 /*****************************************************************
  * Local Types
@@ -248,7 +248,7 @@ dumpTxt (Rooms & rooms)
    hasFirstAndLast = true;
 
 
-  printf ("========================================================\n"
+  printw ("========================================================\n"
 	  "%s\n"
 	  "========================================================\n",
 	  s.c_str ());
@@ -270,18 +270,18 @@ dumpTxt (Rooms & rooms)
     {
       if (i == nRows - 1)
 	{
-	  printf ("%s+", indent);
+	  printw ("%s+", indent);
 
 	  for (j = 0; j < nColumns; j++)
-	    printf ("%s+", dashes.c_str ());
+	    printw ("%s+", dashes.c_str ());
 
-	  printf ("\n");
+	  printw ("\n");
 	}
 
       for (j = 0; j < nColumns; j++)
 	{
 	  if (j == 0)
-	    printf ("%s|", indent);
+	    printw ("%s|", indent);
 
 	  char c = ' ';
 
@@ -292,22 +292,22 @@ dumpTxt (Rooms & rooms)
 
 	    }
 
-	  printf ("%c%c", c, rooms[i][j]->hasEast ()? ' ' : '|');
+	  printw ("%c%c", c, rooms[i][j]->hasEast ()? ' ' : '|');
 	}
 
-      printf ("\n");
-      printf ("%s+", indent);
+      printw ("\n");
+      printw ("%s+", indent);
 
       for (j = 0; j < nColumns; j++)
 	{
 	  if (i == 0 || !rooms[i][j]->hasSouth ())
-	    printf ("%s+", dashes.c_str ());
+	    printw ("%s+", dashes.c_str ());
 
 	  else
-	    printf ("%s+", spaces.c_str ());
+	    printw ("%s+", spaces.c_str ());
 	}
 
-      printf ("\n");
+      printw ("\n");
     }
 }
 
@@ -544,7 +544,11 @@ int main (int argc, char **argv)
   string errMsg = "";
   clock_t begin_search ,end_search;
 
-//  clock_t begin_bfs ,end_bfs, begin_dfs, end_dfs, begin_ids, end_ids, begin_astar, end_astar;
+  /* PDcurses functions*/
+   initscr(); /* Initialize the screen */
+   raw();			  // line-buffering off, echo off, etc.
+   nonl();
+
   
   vector <Agent> agentList;
 
@@ -647,9 +651,9 @@ int main (int argc, char **argv)
     {
       if (false)
 	{
-	  printf ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	  printf ("(%d / %d)\n", i + 1, nWalls);
-	  printf ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+	  printw ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+	  printw ("(%d / %d)\n", i + 1, nWalls);
+	  printw ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
 	  dumpTxt (rooms);
 	}
@@ -769,10 +773,13 @@ int main (int argc, char **argv)
   
 	do
 	{
-		#if DISPLAY
 		Sleep(10);
+		refresh();
+		clear();
+		#if DISPLAY
+		//Sleep(10);
 		#endif
-		system("cls");
+		//system("cls");
 		// Counterreset.
 		completeCounter = 0;
 		// Calculation part.
@@ -789,19 +796,19 @@ int main (int argc, char **argv)
 		void (*dump) (Rooms &) = dumpTxt;
 		dump (rooms);
 
-		//printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DISTANCE | 5 - FINAL");
-		if (static_AgentNumbers < 10)
+		/*printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DISTANCE | 5 - FINAL");*/
+		if (static_AgentNumbers <= 10)
 		for (unsigned int i= 0; i < agentList.size(); i++)
 		{
 			//printf ("\nAgNr %d Tar: %d: Sta: %d  ",agentList[i].getID(), agentList[i].getTarget()->getID(), tempRes[i+iteratNR*(static_AgentNumbers-1)]); 
-			printf ("\nAgNr %d Tar: %d:  ",agentList[i].getID(), agentList[i].getTarget()->getID()); 
+			printw ("\nAgNr %d Tar: %d:  ",agentList[i].getID(), agentList[i].getTarget()->getID()); 
 			for (unsigned int j= 0; j < agentList[i].visitedAgentsList.size(); j++)
 			{	
-				printf ("V-%d |", agentList[i].visitedAgentsList[j]->getID());
+				printw ("V-%d |", agentList[i].visitedAgentsList[j]->getID());
 			}
 			for (unsigned int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
 			{	
-				printf ("n-%d |", agentList[i].notvisitedAgents[z]->getID());
+				printw ("n-%d |", agentList[i].notvisitedAgents[z]->getID());
 			}
 
 		}
@@ -815,10 +822,16 @@ int main (int argc, char **argv)
 		if (completeCounter == static_AgentNumbers)
 			break;
 
+		 /* Because curses stores your window data in a structure; you need to refresh() when you want
+                * to see what you've done */
 	} while(true);
 	end_search = clock();
 	
-	printf ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
+	//printf ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
+	//cout << endl << "Search is complete. It took " << diffclock(begin_search,end_search) << " ms";
+	printw ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
+    refresh();
 
+    endwin(); /* Destroy the curses window */
   return (0);
 }

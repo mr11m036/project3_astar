@@ -1,39 +1,40 @@
-﻿Build started 08.12.2011 17:03:10.
-     1>Project "D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\hausaufgabe6\hausaufgabe6.vcxproj" on node 2 (rebuild target(s)).
-     1>_PrepareForClean:
-         Deleting file "Debug\project3_astar.lastbuildstate".
-       InitializeBuildStatus:
+﻿Build started 1/18/2012 1:15:22 AM.
+     1>Project "D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\hausaufgabe6\hausaufgabe6.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
          Touching "Debug\project3_astar.unsuccessfulbuild".
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt agent.cpp project3_main.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt agent.cpp maze.cpp planner.cpp project3_main.cpp
          project3_main.cpp
-     1>d:\mariodocs\fh\mmr\1.semster\moderne programmierkonzepte ilv  mmr-1 vz (ws2011)\abgaben\project3_astar\hausaufgabe6\project3_main.cpp(679): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
-     1>d:\mariodocs\fh\mmr\1.semster\moderne programmierkonzepte ilv  mmr-1 vz (ws2011)\abgaben\project3_astar\hausaufgabe6\project3_main.cpp(687): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(371) : see declaration of 'sprintf'
-     1>d:\mariodocs\fh\mmr\1.semster\moderne programmierkonzepte ilv  mmr-1 vz (ws2011)\abgaben\project3_astar\hausaufgabe6\project3_main.cpp(796): warning C4309: '=' : truncation of constant value
-     1>d:\mariodocs\fh\mmr\1.semster\moderne programmierkonzepte ilv  mmr-1 vz (ws2011)\abgaben\project3_astar\hausaufgabe6\project3_main.cpp(1392): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\mariodocs\fh\mmr\1.semster\moderne programmierkonzepte ilv  mmr-1 vz (ws2011)\abgaben\project3_astar\hausaufgabe6\pdc34dllw\curses.h(160): warning C4005: 'MOUSE_MOVED' : macro redefinition
+                 c:\program files (x86)\microsoft sdks\windows\v7.0a\include\wincon.h(101) : see previous definition of 'MOUSE_MOVED'
+         planner.cpp
+         maze.cpp
          agent.cpp
+     1>d:\mariodocs\fh\mmr\1.semster\moderne programmierkonzepte ilv  mmr-1 vz (ws2011)\abgaben\project3_astar\hausaufgabe6\agent.cpp(662): warning C4101: 'e1' : unreferenced local variable
          Generating Code...
        ManifestResourceCompile:
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\project3_astar.exe.embed.manifest.res" Debug\project3_astar_manifest.rc 
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\project3_astar.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.lib" /MACHINE:X86 Debug\project3_astar.exe.embed.manifest.res
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.exe" /INCREMENTAL /NOLOGO pdc34dllw/pdcurses.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\project3_astar.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.lib" /MACHINE:X86 Debug\project3_astar.exe.embed.manifest.res
          Debug\agent.obj
+         Debug\maze.obj
+         Debug\planner.obj
          Debug\project3_main.obj
        Manifest:
-         Deleting file "Debug\project3_astar.exe.embed.manifest".
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\project3_astar.exe.embed.manifest" /manifest Debug\project3_astar.exe.intermediate.manifest
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\project3_astar.exe.embed.manifest.res" Debug\project3_astar_manifest.rc 
        LinkEmbedManifest:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\project3_astar.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.lib" /MACHINE:X86 Debug\project3_astar.exe.embed.manifest.res
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.exe" /INCREMENTAL /NOLOGO pdc34dllw/pdcurses.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\project3_astar.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.lib" /MACHINE:X86 Debug\project3_astar.exe.embed.manifest.res
          Debug\agent.obj
+         Debug\maze.obj
+         Debug\planner.obj
          Debug\project3_main.obj
          hausaufgabe6.vcxproj -> D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\Debug\project3_astar.exe
        FinalizeBuildStatus:
          Deleting file "Debug\project3_astar.unsuccessfulbuild".
          Touching "Debug\project3_astar.lastbuildstate".
-     1>Done Building Project "D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\hausaufgabe6\hausaufgabe6.vcxproj" (rebuild target(s)).
+     1>Done Building Project "D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ (WS2011)\abgaben\project3_astar\hausaufgabe6\hausaufgabe6.vcxproj" (build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:03.07
+Time Elapsed 00:00:05.50

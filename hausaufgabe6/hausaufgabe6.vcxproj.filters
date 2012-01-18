@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\curses">
+      <UniqueIdentifier>{77e0c20e-bbb9-42f4-b28c-182b12b64a38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fsa.h">
@@ -29,6 +32,12 @@
     </ClInclude>
     <ClInclude Include="planner.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pdc34dllw\curses.h">
+      <Filter>Header Files\curses</Filter>
+    </ClInclude>
+    <ClInclude Include="pdc34dllw\panel.h">
+      <Filter>Header Files\curses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

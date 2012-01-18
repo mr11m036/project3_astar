@@ -1,6 +1,4 @@
 
-MPK_MarioGrotschar_UE6/fsa.h
-MPK_MarioGrotschar_UE6/maze.h
-Debug/hausaufgabe6.exe
-Debug/hausaufgabe6.ilk
-hausaufgabe6/Debug/agent.obj
+Debug/*
+hausaufgabe6/Debug/*
+ipch/*
