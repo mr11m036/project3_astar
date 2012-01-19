@@ -31,7 +31,7 @@
 #include "planner.h"
 
 /*--- #define-Konstanten und Makros ----------------------------------*/
-#define AGENT_MAXWAIT 4
+#define AGENT_MAXWAIT 2
 #define	AGENT_MAXSEARCH 100
 
 /*--- Datentypen (typedef) -------------------------------------------*/
@@ -52,6 +52,8 @@ class Agent
 {
 	friend bool operator==(const Agent&, const Agent&);
 	friend class MapSearchNode;
+
+
 
 public:
 	enum AgentState
@@ -96,6 +98,7 @@ public:
 	void	setnotvisitedAgents(vector <Agent *> setnotvisited);
 	void	updateDistanceList();
 	void	keepDistance();
+	void	signalContact(Agent *proximityAgent);
 
 	bool	initDistanceMap();
 	bool	inFrame(Agent* targetAgent, Room* targetRoom, float targetFrame);

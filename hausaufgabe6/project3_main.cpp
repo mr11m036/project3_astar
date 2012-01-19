@@ -105,7 +105,7 @@
 #define THEWIDTH 1
 #define DEBUG_LISTS 0
 #define DEBUG	1
-#define DISPLAY	1
+#define DISPLAY	0
 /*****************************************************************
  * C/C++ Headers
  *****************************************************************/
@@ -138,10 +138,10 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (10)
-#define N_COLUMNS (25)
+#define N_ROWS    (100)
+#define N_COLUMNS (100)
 
-const static int static_AgentNumbers = 10;
+const static int static_AgentNumbers = 20;
 
 /*****************************************************************
  * Local Types
@@ -531,6 +531,14 @@ double static diffclock (clock_t start, clock_t finish)
 		return diffms;
 }
 
+void static color (int c)
+{
+     if (c < 8) attron(COLOR_PAIR(c));
+     else if (c == 7) attron(COLOR_PAIR(7));
+     else if (c == 8) attron(COLOR_PAIR(0) | A_BOLD);
+     else attron(COLOR_PAIR(c - 8) | A_BOLD);
+}
+
 /*****************************************************************
  * main
  *****************************************************************/
@@ -548,7 +556,7 @@ int main (int argc, char **argv)
    initscr(); /* Initialize the screen */
    raw();			  // line-buffering off, echo off, etc.
    nonl();
-
+   start_color();
   
   vector <Agent> agentList;
 
@@ -773,13 +781,10 @@ int main (int argc, char **argv)
   
 	do
 	{
-		Sleep(10);
+		//Sleep(10);
 		refresh();
 		clear();
-		#if DISPLAY
-		//Sleep(10);
-		#endif
-		//system("cls");
+
 		// Counterreset.
 		completeCounter = 0;
 		// Calculation part.
@@ -791,6 +796,7 @@ int main (int argc, char **argv)
 
 		}
 
+		
 		#if DISPLAY
 		// Output part
 		void (*dump) (Rooms &) = dumpTxt;
@@ -808,6 +814,7 @@ int main (int argc, char **argv)
 			}
 			for (unsigned int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
 			{	
+				
 				printw ("n-%d |", agentList[i].notvisitedAgents[z]->getID());
 			}
 
@@ -815,7 +822,7 @@ int main (int argc, char **argv)
 		#endif
 
 		#if !DISPLAY
-			printf ("\n %d out of %d completed.", completeCounter, static_AgentNumbers);
+			printw ("\n %d out of %d completed.", completeCounter, static_AgentNumbers);
 		#endif
 		
 		iteratNR++;

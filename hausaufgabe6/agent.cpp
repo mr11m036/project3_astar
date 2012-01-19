@@ -49,6 +49,23 @@ bool operator==(const Agent& x, const Agent& y)
 	return (x.aID == y.aID);
 }
 
+void	Agent::signalContact(Agent *proximityAgent)
+{
+	visitedAgentsIterator tempIt;
+	
+	if (!Agent::alreadyTouched(proximityAgent))
+	{
+		// Add this robot to the visted List
+		tempIt = findVisitedAgent(proximityAgent);
+							
+		Agent::visitedAgentsList.push_back(proximityAgent);
+		if (tempIt != notvisitedAgents.end())
+		{
+			notvisitedAgents.erase(tempIt);
+		}
+			
+	}
+}
 
 /**********************************************************************\
 * Funktionsname: inFrame
@@ -115,71 +132,95 @@ void Agent::keepDistance()
 	
 	mapDistanceIterator mapIt;
 	mapIt = distanceHeuristic.begin();
+	
+	// Insert Default Room if all adjacent fields are occupied.
+	hxRoomInsert.first = -1;
+	hxRoomInsert.second = this->currentRoom;
+	hxRoom.insert(hxRoomInsert);
 
 	visitedAgentsIterator tempIt;
 	// Check if there is an agent in an adjacent room.
 	if (currentRoom->hasEast())
 	{
-		mapIt = distanceHeuristic.begin();
-		dummyAgent.currentRoom = currentRoom->getEast();
-		while (mapIt != distanceHeuristic.end())
+		if (currentRoom->mEast->occupiedRobot == NULL)
 		{
-			distanceHxEast += getEstimateDistance(&dummyAgent, mapIt->first);
-			mapIt++;
-		}	
+			mapIt = distanceHeuristic.begin();
+			dummyAgent.currentRoom = currentRoom->getEast();
+			while (mapIt != distanceHeuristic.end())
+			{
+				distanceHxEast += getEstimateDistance(&dummyAgent, mapIt->first);
+				mapIt++;
+			}	
 
-		hxRoomInsert.first = (float)distanceHxEast;
-		hxRoomInsert.second = currentRoom->mEast;
-		hxRoom.insert(hxRoomInsert);
+			hxRoomInsert.first = (float)distanceHxEast;
+			hxRoomInsert.second = currentRoom->mEast;
+			hxRoom.insert(hxRoomInsert);
+		}
 	}
 				
 	if (currentRoom->hasNorth())
 	{
-		mapIt = distanceHeuristic.begin();
-		dummyAgent.currentRoom = currentRoom->getNorth();
-		while (mapIt != distanceHeuristic.end())
+		if (currentRoom->mNorth->occupiedRobot == NULL)
 		{
-			distanceHxNorth += getEstimateDistance(&dummyAgent, mapIt->first);
-			mapIt++;
-		}	
-		hxRoomInsert.first = (float)distanceHxNorth;
-		hxRoomInsert.second = currentRoom->mNorth;
-		hxRoom.insert(hxRoomInsert);
+			mapIt = distanceHeuristic.begin();
+			dummyAgent.currentRoom = currentRoom->getNorth();
+			while (mapIt != distanceHeuristic.end())
+			{
+				distanceHxNorth += getEstimateDistance(&dummyAgent, mapIt->first);
+				mapIt++;
+			}	
+			hxRoomInsert.first = (float)distanceHxNorth;
+			hxRoomInsert.second = currentRoom->mNorth;
+			hxRoom.insert(hxRoomInsert);
+		}
 	}
 				
 	if (currentRoom->hasSouth())
 	{
-		mapIt = distanceHeuristic.begin();
-		dummyAgent.currentRoom = currentRoom->getSouth();
-		while (mapIt != distanceHeuristic.end())
+		if (currentRoom->mSouth->occupiedRobot == NULL)
 		{
-			distanceHxSouth += getEstimateDistance(&dummyAgent, mapIt->first);
-			mapIt++;
-		}	
-		hxRoomInsert.first = (float)distanceHxSouth;
-		hxRoomInsert.second = currentRoom->mSouth;
-		hxRoom.insert(hxRoomInsert);
+			mapIt = distanceHeuristic.begin();
+			dummyAgent.currentRoom = currentRoom->getSouth();
+			while (mapIt != distanceHeuristic.end())
+			{
+				distanceHxSouth += getEstimateDistance(&dummyAgent, mapIt->first);
+				mapIt++;
+			}	
+			hxRoomInsert.first = (float)distanceHxSouth;
+			hxRoomInsert.second = currentRoom->mSouth;
+			hxRoom.insert(hxRoomInsert);
+		}
 	}
 				
 	if (currentRoom->hasWest())
 	{
-		mapIt = distanceHeuristic.begin();
-		dummyAgent.currentRoom = currentRoom->getWest();
-		while (mapIt != distanceHeuristic.end())
+		if (currentRoom->mWest->occupiedRobot == NULL)
 		{
-			distanceHxWest += getEstimateDistance(&dummyAgent, mapIt->first);
-			mapIt++;
-		}
+			mapIt = distanceHeuristic.begin();
+			dummyAgent.currentRoom = currentRoom->getWest();
+			while (mapIt != distanceHeuristic.end())
+			{
+				distanceHxWest += getEstimateDistance(&dummyAgent, mapIt->first);
+				mapIt++;
+			}
 		
-		hxRoomInsert.first = (float)distanceHxWest;
-		hxRoomInsert.second = currentRoom->mWest;
-		hxRoom.insert(hxRoomInsert);
+			hxRoomInsert.first = (float)distanceHxWest;
+			hxRoomInsert.second = currentRoom->mWest;
+			hxRoom.insert(hxRoomInsert);
+		}
 	}
 
 	// Get last element. Due to the weak ordering it is the node with the greatest distance to all other agents.
-	hxRoomIterator = hxRoom.end();
-	hxRoomIterator --;
-	/*hxRoomIterator = hxRoom.begin();*/
+	try
+	{
+		hxRoomIterator = hxRoom.end();
+		hxRoomIterator--;
+
+	}
+	catch (...)
+	{
+		cout << "Error in Keep distance.";
+	}
 
 	plannedPath.push_back(hxRoomIterator->second);
 	plannedPathIterator = plannedPath.begin();
@@ -529,6 +570,7 @@ void Agent::scanAgents()
 		{
 			if (!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
 			{
+				currentRoom->mEast->occupiedRobot->signalContact(this);
 				// Add this robot to the visted List
 				tempIt = findVisitedAgent(currentRoom->mEast->occupiedRobot);
 							
@@ -537,11 +579,62 @@ void Agent::scanAgents()
 				{
 					notvisitedAgents.erase(tempIt);
 				}
-
-
 			
 			}
-		}
+
+			//// NEW STUFF
+			///*
+			//*   XOO
+			//*   ORO
+			//*   OOO
+			//*
+			//*   R ... Current Robot
+			//*   X ... adjacent field to check. North-East
+			//*/
+			//if (currentRoom->mEast->hasNorth())
+			//{
+			//	if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//	{
+			//		if (!Agent::alreadyTouched(currentRoom->mEast->mNorth->occupiedRobot))
+			//		{
+			//			// Add this robot to the visted List
+			//			tempIt = findVisitedAgent(currentRoom->mEast->mNorth->occupiedRobot);
+			//				
+			//			Agent::visitedAgentsList.push_back(currentRoom->mEast->mNorth->occupiedRobot);
+			//			if (tempIt != notvisitedAgents.end())
+			//			{
+			//				notvisitedAgents.erase(tempIt);
+			//			}
+			//		} // Endif if(!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			//	} // Endif if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//} // Endif if (currentRoom->mEast->hasNorth())
+
+			//			/*
+			//*   XOO
+			//*   ORO
+			//*   OOO
+			//*
+			//*   R ... Current Robot
+			//*   X ... adjacent field to check. North-East
+			//*/
+			//if (currentRoom->mEast->hasSouth())
+			//{
+			//	if (currentRoom->mEast->mSouth->occupiedRobot != NULL)
+			//	{
+			//		if (!Agent::alreadyTouched(currentRoom->mEast->mSouth->occupiedRobot))
+			//		{
+			//			// Add this robot to the visted List
+			//			tempIt = findVisitedAgent(currentRoom->mEast->mSouth->occupiedRobot);
+			//				
+			//			Agent::visitedAgentsList.push_back(currentRoom->mEast->mSouth->occupiedRobot);
+			//			if (tempIt != notvisitedAgents.end())
+			//			{
+			//				notvisitedAgents.erase(tempIt);
+			//			}
+			//		} // Endif if(!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			//	} // Endif if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//} // Endif if (currentRoom->mEast->hasNorth())
+		} // Endif if (!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
 	}
 				
 	if (currentRoom->hasNorth())
@@ -550,6 +643,7 @@ void Agent::scanAgents()
 		{
 			if (!Agent::alreadyTouched(currentRoom->mNorth->occupiedRobot))
 			{
+				currentRoom->mNorth->occupiedRobot->signalContact(this);
 				// Add this robot to the visted List
 				tempIt = findVisitedAgent(currentRoom->mNorth->occupiedRobot);
 				Agent::visitedAgentsList.push_back(currentRoom->mNorth->occupiedRobot);
@@ -561,6 +655,59 @@ void Agent::scanAgents()
 
 
 			}
+
+			//			// NEW STUFF
+			///*
+			//*   OOX
+			//*   ORO
+			//*   OOO
+			//*
+			//*   R ... Current Robot
+			//*   X ... adjacent field to check. North-East
+			//*/
+			//if (currentRoom->mNorth->hasWest())
+			//{
+			//	if (currentRoom->mNorth->mWest->occupiedRobot != NULL)
+			//	{
+			//		if (!Agent::alreadyTouched(currentRoom->mNorth->mWest->occupiedRobot))
+			//		{
+			//			// Add this robot to the visted List
+			//			tempIt = findVisitedAgent(currentRoom->mNorth->mWest->occupiedRobot);
+			//				
+			//			Agent::visitedAgentsList.push_back(currentRoom->mNorth->mWest->occupiedRobot);
+			//			if (tempIt != notvisitedAgents.end())
+			//			{
+			//				notvisitedAgents.erase(tempIt);
+			//			}
+			//		} // Endif if(!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			//	} // Endif if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//} // Endif if (currentRoom->mEast->hasNorth())
+
+			//			/*
+			//*   XOO
+			//*   ORO
+			//*   OOO
+			//*
+			//*   R ... Current Robot
+			//*   X ... adjacent field to check. North-East
+			//*/
+			//if (currentRoom->mNorth->hasEast())
+			//{
+			//	if (currentRoom->mNorth->mEast->occupiedRobot != NULL)
+			//	{
+			//		if (!Agent::alreadyTouched(currentRoom->mNorth->mEast->occupiedRobot))
+			//		{
+			//			// Add this robot to the visted List
+			//			tempIt = findVisitedAgent(currentRoom->mNorth->mEast->occupiedRobot);
+			//				
+			//			Agent::visitedAgentsList.push_back(currentRoom->mNorth->mEast->occupiedRobot);
+			//			if (tempIt != notvisitedAgents.end())
+			//			{
+			//				notvisitedAgents.erase(tempIt);
+			//			}
+			//		} // Endif if(!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			//	} // Endif if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//} // Endif if (currentRoom->mEast->hasNorth())
 		}
 	}
 				
@@ -570,6 +717,7 @@ void Agent::scanAgents()
 		{
 			if (!Agent::alreadyTouched(currentRoom->mSouth->occupiedRobot))
 			{
+				currentRoom->mSouth->occupiedRobot->signalContact(this);
 				// Add this robot to the visted List
 				tempIt = findVisitedAgent(currentRoom->mSouth->occupiedRobot);
 				Agent::visitedAgentsList.push_back(currentRoom->mSouth->occupiedRobot);
@@ -581,6 +729,59 @@ void Agent::scanAgents()
 				
 
 			}
+
+			//					// NEW STUFF
+			///*
+			//*   OOX
+			//*   ORO
+			//*   OOO
+			//*
+			//*   R ... Current Robot
+			//*   X ... adjacent field to check. North-East
+			//*/
+			//if (currentRoom->mSouth->hasWest())
+			//{
+			//	if (currentRoom->mSouth->mWest->occupiedRobot != NULL)
+			//	{
+			//		if (!Agent::alreadyTouched(currentRoom->mSouth->mWest->occupiedRobot))
+			//		{
+			//			// Add this robot to the visted List
+			//			tempIt = findVisitedAgent(currentRoom->mSouth->mWest->occupiedRobot);
+			//				
+			//			Agent::visitedAgentsList.push_back(currentRoom->mSouth->mWest->occupiedRobot);
+			//			if (tempIt != notvisitedAgents.end())
+			//			{
+			//				notvisitedAgents.erase(tempIt);
+			//			}
+			//		} // Endif if(!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			//	} // Endif if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//} // Endif if (currentRoom->mEast->hasNorth())
+
+			//			/*
+			//*   XOO
+			//*   ORO
+			//*   OOO
+			//*
+			//*   R ... Current Robot
+			//*   X ... adjacent field to check. North-East
+			//*/
+			//if (currentRoom->mSouth->hasEast())
+			//{
+			//	if (currentRoom->mSouth->mEast->occupiedRobot != NULL)
+			//	{
+			//		if (!Agent::alreadyTouched(currentRoom->mSouth->mEast->occupiedRobot))
+			//		{
+			//			// Add this robot to the visted List
+			//			tempIt = findVisitedAgent(currentRoom->mSouth->mEast->occupiedRobot);
+			//				
+			//			Agent::visitedAgentsList.push_back(currentRoom->mSouth->mEast->occupiedRobot);
+			//			if (tempIt != notvisitedAgents.end())
+			//			{
+			//				notvisitedAgents.erase(tempIt);
+			//			}
+			//		} // Endif if(!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			//	} // Endif if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//} // Endif if (currentRoom->mEast->hasNorth())
 		}
 	}
 				
@@ -590,6 +791,7 @@ void Agent::scanAgents()
 		{
 			if (!Agent::alreadyTouched(currentRoom->mWest->occupiedRobot))
 			{
+				currentRoom->mWest->occupiedRobot->signalContact(this);
 				// Add this robot to the visted List
 				tempIt = findVisitedAgent(currentRoom->mWest->occupiedRobot);
 				Agent::visitedAgentsList.push_back(currentRoom->mWest->occupiedRobot);
@@ -598,9 +800,60 @@ void Agent::scanAgents()
 				{
 					notvisitedAgents.erase(tempIt);
 				}
-
-
 			}
+
+			//		// NEW STUFF
+			///*
+			//*   XOO
+			//*   ORO
+			//*   OOO
+			//*
+			//*   R ... Current Robot
+			//*   X ... adjacent field to check. North-East
+			//*/
+			//if (currentRoom->mWest->hasNorth())
+			//{
+			//	if (currentRoom->mWest->mNorth->occupiedRobot != NULL)
+			//	{
+			//		if (!Agent::alreadyTouched(currentRoom->mWest->mNorth->occupiedRobot))
+			//		{
+			//			// Add this robot to the visted List
+			//			tempIt = findVisitedAgent(currentRoom->mWest->mNorth->occupiedRobot);
+			//				
+			//			Agent::visitedAgentsList.push_back(currentRoom->mWest->mNorth->occupiedRobot);
+			//			if (tempIt != notvisitedAgents.end())
+			//			{
+			//				notvisitedAgents.erase(tempIt);
+			//			}
+			//		} // Endif if(!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			//	} // Endif if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//} // Endif if (currentRoom->mEast->hasNorth())
+
+			//			/*
+			//*   XOO
+			//*   ORO
+			//*   OOO
+			//*
+			//*   R ... Current Robot
+			//*   X ... adjacent field to check. North-East
+			//*/
+			//if (currentRoom->mWest->hasSouth())
+			//{
+			//	if (currentRoom->mWest->mSouth->occupiedRobot != NULL)
+			//	{
+			//		if (!Agent::alreadyTouched(currentRoom->mWest->mSouth->occupiedRobot))
+			//		{
+			//			// Add this robot to the visted List
+			//			tempIt = findVisitedAgent(currentRoom->mWest->mSouth->occupiedRobot);
+			//				
+			//			Agent::visitedAgentsList.push_back(currentRoom->mWest->mSouth->occupiedRobot);
+			//			if (tempIt != notvisitedAgents.end())
+			//			{
+			//				notvisitedAgents.erase(tempIt);
+			//			}
+			//		} // Endif if(!Agent::alreadyTouched(currentRoom->mEast->occupiedRobot))
+			//	} // Endif if (currentRoom->mEast->mNorth->occupiedRobot != NULL)
+			//} // Endif if (currentRoom->mEast->hasNorth())
 		}
 	}
 	// Endof Robot check for visted agents
@@ -1003,8 +1256,11 @@ unsigned int Agent::startAgent()
 		{
 			case AGENT_STATE_COMPLETE:
 				nextState = AGENT_STATE_COMPLETE;
-				keepDistance();
-				moveAgent(AGENT_STATE_NOP);
+				if (rand() % 10 < 7)
+				{
+					keepDistance();
+					moveAgent(AGENT_STATE_NOP);
+				}
 				
 			break;
 
