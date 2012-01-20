@@ -138,17 +138,12 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-<<<<<<< HEAD
+
 #define N_ROWS    (20)
 #define N_COLUMNS (20)
 
 const static int static_AgentNumbers = 10;
-=======
-#define N_ROWS    (25)
-#define N_COLUMNS (40)
 
-const static int static_AgentNumbers = 50;
->>>>>>> cb03ffe0acd6b7b998f5adf3bfa25ef2f778b380
 
 /*****************************************************************
  * Local Types
@@ -540,10 +535,16 @@ double static diffclock (clock_t start, clock_t finish)
 
 void static color (int c)
 {
-     if (c < 8) attron(COLOR_PAIR(c));
-     else if (c == 7) attron(COLOR_PAIR(7));
-     else if (c == 8) attron(COLOR_PAIR(0) | A_BOLD);
-     else attron(COLOR_PAIR(c - 8) | A_BOLD);
+if (c < 8) {
+         attron(COLOR_PAIR(c));
+         attroff(A_BOLD);
+     }
+     else if (c == 8) {
+         attron(COLOR_PAIR(0) | A_BOLD);
+     }
+     else {
+         attron(COLOR_PAIR(c - 8) | A_BOLD);
+     }
 }
 
 /*****************************************************************
@@ -558,14 +559,26 @@ int main (int argc, char **argv)
   bool help = false;
   string errMsg = "";
   clock_t begin_search ,end_search;
-
-  /* PDcurses functions*/
-   initscr(); /* Initialize the screen */
-   raw();			  // line-buffering off, echo off, etc.
-   nonl();
-   start_color();
-  
   vector <Agent> agentList;
+
+	/* PDcurses functions*/
+	/* Initialize the screen */
+	initscr(); 
+	raw(); // line-buffering off, echo off, etc.
+	nonl();
+
+	/* Init color map */
+	start_color();
+	init_pair(0, COLOR_BLACK, COLOR_BLACK);
+	init_pair(1, COLOR_BLUE, COLOR_BLACK);
+	init_pair(2, COLOR_GREEN, COLOR_BLACK);
+	init_pair(3, COLOR_CYAN, COLOR_BLACK);
+	init_pair(4, COLOR_RED, COLOR_BLACK);
+	init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(6, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(7, COLOR_WHITE, COLOR_BLACK);
+
+ 
 
 
   bool status =
@@ -775,9 +788,6 @@ int main (int argc, char **argv)
 
   initAgents(static_AgentNumbers, agentList, rooms);
 
-
-
-
 	vector<int> tempRes;
 	int iteratNR = 0;
 	int completeCounter = 0;
@@ -800,7 +810,7 @@ int main (int argc, char **argv)
 		// Calculation part.
 		for (int ag_n = 0; ag_n < static_AgentNumbers; ag_n ++)
 		{
-			tempRes.push_back  (agentList[ag_n].startAgent());
+			agentList[ag_n].startAgent();
 			if (agentList[ag_n].isSearchComplete())
 				++completeCounter;
 
@@ -812,22 +822,24 @@ int main (int argc, char **argv)
 		void (*dump) (Rooms &) = dumpTxt;
 		dump (rooms);
 
-		/*printf ("0 - INIT | 1 - SEARCH | 2 - COLLISION | 3 - PLAN  | 4 -DISTANCE | 5 - FINAL");*/
+
 		if (static_AgentNumbers <= 10)
 		for (unsigned int i= 0; i < agentList.size(); i++)
 		{
-			//printf ("\nAgNr %d Tar: %d: Sta: %d  ",agentList[i].getID(), agentList[i].getTarget()->getID(), tempRes[i+iteratNR*(static_AgentNumbers-1)]); 
+			
 			printw ("\nAgNr %d Tar: %d:  ",agentList[i].getID(), agentList[i].getTarget()->getID()); 
 			for (unsigned int j= 0; j < agentList[i].visitedAgentsList.size(); j++)
 			{	
+				color(2);
 				printw ("V-%d |", agentList[i].visitedAgentsList[j]->getID());
 			}
 			for (unsigned int z= 0; z < agentList[i].notvisitedAgents.size(); z++)
 			{	
-				
+				color(4);
 				printw ("n-%d |", agentList[i].notvisitedAgents[z]->getID());
 			}
 
+			color(7);
 		}
 		#endif
 
@@ -844,8 +856,8 @@ int main (int argc, char **argv)
 	} while(true);
 	end_search = clock();
 	refresh();
-	//printf ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
-	//cout << endl << "Search is complete. It took " << diffclock(begin_search,end_search) << " ms";
+
+	color (4);
 	printw ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
     refresh();
 
