@@ -138,10 +138,17 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
+<<<<<<< HEAD
 #define N_ROWS    (20)
 #define N_COLUMNS (20)
 
 const static int static_AgentNumbers = 10;
+=======
+#define N_ROWS    (25)
+#define N_COLUMNS (40)
+
+const static int static_AgentNumbers = 50;
+>>>>>>> cb03ffe0acd6b7b998f5adf3bfa25ef2f778b380
 
 /*****************************************************************
  * Local Types
@@ -725,8 +732,6 @@ int main (int argc, char **argv)
   int leftWalls = nWalls - tornWalls; // Number of left walls
   tornWalls = 0;
 
-  
-
   do
   {
 	  int value1 = rand ();
@@ -776,13 +781,18 @@ int main (int argc, char **argv)
 	vector<int> tempRes;
 	int iteratNR = 0;
 	int completeCounter = 0;
-	    begin_search = clock();
+
+	cout << "Press any key to start.\n";
+	getchar();
+
+	begin_search = clock();
 
   
 	do
 	{
-		//Sleep(10);
+		//Sleep(500);
 		refresh();
+		//Sleep(100);
 		clear();
 
 		// Counterreset.
@@ -833,7 +843,7 @@ int main (int argc, char **argv)
                 * to see what you've done */
 	} while(true);
 	end_search = clock();
-	
+	refresh();
 	//printf ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
 	//cout << endl << "Search is complete. It took " << diffclock(begin_search,end_search) << " ms";
 	printw ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
