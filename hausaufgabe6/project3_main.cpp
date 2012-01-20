@@ -105,7 +105,7 @@
 #define THEWIDTH 1
 #define DEBUG_LISTS 0
 #define DEBUG	1
-#define DISPLAY	0
+#define DISPLAY	1
 /*****************************************************************
  * C/C++ Headers
  *****************************************************************/
@@ -138,10 +138,10 @@ using  std::vector;
  * Local Defines
  *****************************************************************/
 
-#define N_ROWS    (100)
-#define N_COLUMNS (100)
+#define N_ROWS    (20)
+#define N_COLUMNS (20)
 
-const static int static_AgentNumbers = 20;
+const static int static_AgentNumbers = 10;
 
 /*****************************************************************
  * Local Types
