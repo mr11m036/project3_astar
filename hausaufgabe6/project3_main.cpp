@@ -102,10 +102,7 @@
 //       -h          => display help information
 // -----------------------------------------------------------------
 
-#define THEWIDTH 1
-#define DEBUG_LISTS 0
-#define DEBUG	1
-#define DISPLAY	1
+
 /*****************************************************************
  * C/C++ Headers
  *****************************************************************/
@@ -137,12 +134,18 @@ using  std::vector;
 /*****************************************************************
  * Local Defines
  *****************************************************************/
-
+#define THEWIDTH 1
+#define DEBUG_LISTS 0
+#define DEBUG	1
+#define DISPLAY	1
+#define	MAXCOLOR 6
+#define MAXAGENTDISPLAY 12
+#define	DISPLAYDELAY 0
 
 #define N_ROWS    (20)
-#define N_COLUMNS (20)
+#define N_COLUMNS (30)
 
-const static int static_AgentNumbers = 10;
+const static int static_AgentNumbers = 12;
 
 
 /*****************************************************************
@@ -154,6 +157,7 @@ const static int static_AgentNumbers = 10;
 /*****************************************************************
  * Local Function Prototypes
  *****************************************************************/
+void static color (int c);
 
 static void
 seedRandom ();
@@ -293,8 +297,11 @@ dumpTxt (Rooms & rooms)
 			  c =  0x30 +  rooms[i][j]->occupiedRobot->getID() ;
 
 	    }
-
-	  printw ("%c%c", c, rooms[i][j]->hasEast ()? ' ' : '|');
+	  color(c%MAXCOLOR);
+	  //printw ("%c%c", c, rooms[i][j]->hasEast ()? ' ' : '|');
+	  printw ("%c", c);
+	  color(7);
+	  printw ("%c", rooms[i][j]->hasEast ()? ' ' : '|');
 	}
 
       printw ("\n");
@@ -800,9 +807,11 @@ int main (int argc, char **argv)
   
 	do
 	{
-		//Sleep(500);
+		#if DISPLAYDELAY
+		Sleep(500);
+		#endif
+		
 		refresh();
-		//Sleep(100);
 		clear();
 
 		// Counterreset.
@@ -823,7 +832,7 @@ int main (int argc, char **argv)
 		dump (rooms);
 
 
-		if (static_AgentNumbers <= 10)
+		if (static_AgentNumbers <= MAXAGENTDISPLAY)
 		for (unsigned int i= 0; i < agentList.size(); i++)
 		{
 			
@@ -859,8 +868,9 @@ int main (int argc, char **argv)
 
 	color (4);
 	printw ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
+	printw ("\nPress any key to terminate programm.");
     refresh();
-
+	getchar();
     endwin(); /* Destroy the curses window */
   return (0);
 }

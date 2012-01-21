@@ -49,6 +49,16 @@ bool operator==(const Agent& x, const Agent& y)
 	return (x.aID == y.aID);
 }
 
+/**********************************************************************\
+* Funktionsname: signalContact
+*
+* Kurzbeschreibung: Die einzige art der Kommunikation. Das ist nötig, da 
+* es sonst passieren kann, dass ein Roboter einen anderen beruehrt dieser
+* den Beruehrer aber nicht. Das ist die Folge eines sequentiellen Ablaufs 
+* der Roboter innerhalb einer Iteration
+*
+\**********************************************************************/
+
 void	Agent::signalContact(Agent *proximityAgent)
 {
 	visitedAgentsIterator tempIt;
@@ -1256,6 +1266,8 @@ unsigned int Agent::startAgent()
 		{
 			case AGENT_STATE_COMPLETE:
 				nextState = AGENT_STATE_COMPLETE;
+				/* Putting some entropy into the system.
+				 Without this deadlocks could occur. */
 				if (rand() % 10 < 7)
 				{
 					keepDistance();
