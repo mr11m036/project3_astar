@@ -141,11 +141,12 @@ using  std::vector;
 #define	MAXCOLOR 6
 #define MAXAGENTDISPLAY 12
 #define	DISPLAYDELAY 0
+#define	WAITFORINPUT 0
 
-#define N_ROWS    (20)
-#define N_COLUMNS (30)
+#define N_ROWS    (10)
+#define N_COLUMNS (10)
 
-const static int static_AgentNumbers = 12;
+const static int static_AgentNumbers = 10;
 
 
 /*****************************************************************
@@ -506,7 +507,7 @@ static void	initAgents(int agentNumbers, vector <Agent> &setAgents, Rooms _rooms
 			if (setAgents[i].currentRoom == tempAgent.currentRoom)
 				{
 				duplicate = 1;
-				cout << "gewaehlter Raum (random) bereits besetzt -> neuer Raum wird gewaehlt" << endl;
+				cout << "gewaehlter Raum (random) bereits besetzt -> neuer Raum wird gewaehlt\n" << endl;
 				}
 			}
 	   } while (duplicate == 1);
@@ -625,6 +626,10 @@ int main (int argc, char **argv)
 
   seedRandom ();
 
+  printf ("Project 3\n");
+  printf ("=========\n");
+  printf ("\n");
+
   int i = 0;
   int j = 0;
 
@@ -686,9 +691,9 @@ int main (int argc, char **argv)
     {
       if (false)
 	{
-	  printw ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	  printw ("(%d / %d)\n", i + 1, nWalls);
-	  printw ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+	  printf ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+	  printf ("(%d / %d)\n", i + 1, nWalls);
+	  printf ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
 	  dumpTxt (rooms);
 	}
@@ -788,7 +793,7 @@ int main (int argc, char **argv)
  
 
 #ifdef DEBUG
-	printf ("Torn down walls: %d ", tornWalls+(nWalls-leftWalls));
+	printf ("Torn down walls: %d \n", tornWalls+(nWalls-leftWalls));
 #endif
 
 
@@ -799,8 +804,10 @@ int main (int argc, char **argv)
 	int iteratNR = 0;
 	int completeCounter = 0;
 
+	#if WAITFORINPUT
 	cout << "Press any key to start.\n";
 	getchar();
+	#endif
 
 	begin_search = clock();
 
@@ -868,9 +875,13 @@ int main (int argc, char **argv)
 
 	color (4);
 	printw ("\nSearch is complete. It took %f ms.",double(diffclock(begin_search,end_search)));
+	#if WAITFORINPUT
 	printw ("\nPress any key to terminate programm.");
+	#endif
     refresh();
+	#if WAITFORINPUT
 	getchar();
+	#endif
     endwin(); /* Destroy the curses window */
   return (0);
 }

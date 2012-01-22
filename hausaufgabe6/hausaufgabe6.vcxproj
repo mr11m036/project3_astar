@@ -44,6 +44,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ %28WS2011%29\abgaben\project3_astar\hausaufgabe6\pdc34dllw;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ %28WS2011%29\abgaben\project3_astar\hausaufgabe6\pdc34dllw;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -68,12 +70,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\mariodocs\FH\mmr\1.Semster\Moderne Programmierkonzepte ILV  MMR-1 VZ %28WS2011%29\abgaben\project3_astar\hausaufgabe6\pdc34dllw;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>pdcurses.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
